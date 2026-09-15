@@ -809,7 +809,7 @@ const code = this.generateCode();
   // ── Media registry ──────────────────────────────────────────
 
   async registerMedia(relationshipId: string, media: Memory["media"][number]): Promise<void> {
-    await this.db.media.create({ data: { ...media } });
+    await this.db.media.create({ data: { ...media, relationshipId } });
   }
 }
 

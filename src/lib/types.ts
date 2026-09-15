@@ -24,6 +24,19 @@ export type MemoryKind =
 
 export type MemoryVisibility = "both" | "me-only";
 
+/** How reliable a memory's details are.
+ *  - verified: recorded from a settled fact
+ *  - needs-confirmation: detail is uncertain (place name, exact date…)
+ *  - incomplete: a page we haven't finished writing yet
+ */
+export type MemoryStatus = "verified" | "needs-confirmation" | "incomplete";
+
+export const MEMORY_STATUS: { value: MemoryStatus; label: string }[] = [
+  { value: "verified", label: "Confirmed" },
+  { value: "needs-confirmation", label: "To confirm" },
+  { value: "incomplete", label: "To be written" },
+];
+
 export type MediaType = "image" | "video" | "audio";
 
 export interface MediaAsset {
@@ -66,6 +79,8 @@ export interface Memory {
   createdBy: string;
   /** which user created it (for "who" display) */
   createdByName: string;
+  /** how settled this memory's details are — verified / needs-confirmation / incomplete */
+  status?: MemoryStatus | null;
   /** star placement on the constellation (0..1 relative coords) */
   constellationX?: number | null;
   constellationY?: number | null;
@@ -274,6 +289,10 @@ export interface RelationshipMemberView {
   name: string;
   email: string;
   avatarUrl?: string | null;
+  /** contact fields — only ever what the couple themselves posted */
+  whatsapp?: string | null;
+  github?: string | null;
+  instagram?: string | null;
   isOwner: boolean;
 }
 
@@ -299,6 +318,10 @@ export interface User {
   passwordHash?: string | null;
   avatarUrl?: string | null;
   relationshipId?: string | null;
+  /** contact fields — only what the couple themselves post; never invented */
+  whatsapp?: string | null;
+  github?: string | null;
+  instagram?: string | null;
 }
 
 export interface Statistics {

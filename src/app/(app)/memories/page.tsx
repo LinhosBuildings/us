@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
-import { Card, SectionLabel, Pill, EmptyState, Button } from "@/components/ui";
+import { Card, SectionLabel, Pill, EmptyState, Button, MemoryStatusPill } from "@/components/ui";
 import { formatDate, pluralize } from "@/lib/utils";
 
 export default async function MemoriesListPage() {
@@ -49,6 +49,7 @@ export default async function MemoriesListPage() {
                   <div className="flex items-center gap-2 mb-2">
                     <Pill tone="gold">{m.kind}</Pill>
                     {m.mood ? <Pill>{m.mood}</Pill> : null}
+                    <MemoryStatusPill status={m.status} />
                   </div>
                   <h3 className="text-sm font-medium text-ink group-hover:text-champagne-soft">{m.title}</h3>
                   {m.description ? (

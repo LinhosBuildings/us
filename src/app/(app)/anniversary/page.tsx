@@ -26,7 +26,7 @@ export default async function AnniversaryPage() {
       </div>
 
       <div className="mx-auto max-w-md">
-        <RelationshipCounter startDate={rel.startDate} />
+        <RelationshipCounter startDate={rel.startDate} initial={c} />
       </div>
 
       <div className="mx-auto max-w-lg text-center">

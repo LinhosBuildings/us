@@ -19,14 +19,17 @@ export function computeCounter(startDate: string, now: Date | number = new Date(
   }
   const nowDate = now instanceof Date ? now : new Date(now);
 
+  // Timezone-safe: everything below uses UTC so the server and any client
+  // (Lagos, UTC+1, etc.) render the exact same numbers for the same instant.
+  // The startDate is stored as ISO with a Z suffix.
   const totalDays = Math.max(0, Math.floor((nowDate.getTime() - start.getTime()) / 86_400_000));
 
-  let years = nowDate.getFullYear() - start.getFullYear();
-  let months = nowDate.getMonth() - start.getMonth();
-  let days = nowDate.getDate() - start.getDate();
+  let years = nowDate.getUTCFullYear() - start.getUTCFullYear();
+  let months = nowDate.getUTCMonth() - start.getUTCMonth();
+  let days = nowDate.getUTCDate() - start.getUTCDate();
   if (days < 0) {
     months -= 1;
-    days += new Date(nowDate.getFullYear(), nowDate.getMonth(), 0).getDate();
+    days += new Date(Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), 0)).getUTCDate();
   }
   if (months < 0) {
     years -= 1;
@@ -34,17 +37,17 @@ export function computeCounter(startDate: string, now: Date | number = new Date(
   }
 
   const isAnniversary =
-    nowDate.getDate() === start.getDate() && nowDate.getMonth() === start.getMonth();
+    nowDate.getUTCDate() === start.getUTCDate() && nowDate.getUTCMonth() === start.getUTCMonth();
 
   return {
     years,
     months,
     days,
-    hours: nowDate.getHours(),
-    minutes: nowDate.getMinutes(),
-    seconds: nowDate.getSeconds(),
+    hours: nowDate.getUTCHours(),
+    minutes: nowDate.getUTCMinutes(),
+    seconds: nowDate.getUTCSeconds(),
     totalDays,
-    totalHours: totalDays * 24 + nowDate.getHours(),
+    totalHours: totalDays * 24 + nowDate.getUTCHours(),
     totalMinutes: totalDays * 1440,
     isAnniversary,
     yearsTogether: years + (isAnniversary ? 1 : 0),

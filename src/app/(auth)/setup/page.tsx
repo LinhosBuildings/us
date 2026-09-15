@@ -17,11 +17,11 @@ export default function SetupPage() {
 
       <form action={formAction} className="mt-8 space-y-5">
         <Field label="Your partner's first name" hint="Just the first name is fine">
-          <Input name="partnerName" placeholder="e.g. Maya" required autoFocus />
+          <Input name="partnerName" placeholder="e.g. Biggy" required autoFocus />
         </Field>
 
         <Field label="When did it start?" hint='The first day you count as "us"'>
-          <Input name="startDate" type="date" required defaultValue="2024-08-18" />
+          <Input name="startDate" type="date" required />
         </Field>
 
         <Field label="Universe name (optional)" hint="Default: first names">

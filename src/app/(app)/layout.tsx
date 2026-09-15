@@ -3,7 +3,6 @@ import Link from "next/link";
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
 import { computeCounter } from "@/lib/relationship-counter";
-import { RelationshipCounter } from "@/components/relationship-counter";
 import { Avatar } from "@/components/ui";
 
 const NAV_ITEMS = [

@@ -21,7 +21,7 @@ import type {
 import { uid } from "@/lib/utils";
 import type { CreateMemoryInput, DataStore } from "@/lib/data/contracts";
 import { svgAvatar, svgPhoto } from "@/lib/data/demo-art";
-import { ALEX, REL, seedChapters, seedRelationship, seedUsers } from "@/lib/data/demo/seed-core";
+import { LINHO, REL, seedChapters, seedRelationship, seedUsers } from "@/lib/data/demo/seed-core";
 import { seedMemories, seedPerspectives } from "@/lib/data/demo/seed-memories";
 import { seedConfessions, seedLetters, seedOpenWhen } from "@/lib/data/demo/seed-letters";
 import {
@@ -102,7 +102,7 @@ export class DemoStore implements DataStore {
   async findUserById(id: string) {
     return this.users.get(id) ?? null;
   }
-  async createUser(data: { name: string; email: string; passwordHash: string }) {
+  async createUser(data: { name: string; email: string; passwordHash: string; whatsapp?: string | null; github?: string | null; instagram?: string | null }) {
     const user: User = {
       id: uid("usr"),
       name: data.name,
@@ -110,8 +110,33 @@ export class DemoStore implements DataStore {
       passwordHash: data.passwordHash,
       avatarUrl: svgAvatar({ seed: data.email, name: data.name }),
       relationshipId: null,
+      whatsapp: data.whatsapp ?? null,
+      github: data.github ?? null,
+      instagram: data.instagram ?? null,
     };
     this.users.set(user.id, user);
+    return user;
+  }
+  async updateUserProfile(userId: string, data: { name?: string; avatarUrl?: string | null; whatsapp?: string | null; github?: string | null; instagram?: string | null }) {
+    const user = this.users.get(userId);
+    if (!user) return null;
+    if (data.name !== undefined && data.name.trim()) user.name = data.name.trim().slice(0, 80);
+    if (data.avatarUrl !== undefined) user.avatarUrl = data.avatarUrl;
+    if (data.whatsapp !== undefined) user.whatsapp = data.whatsapp ?? null;
+    if (data.github !== undefined) user.github = data.github ?? null;
+    if (data.instagram !== undefined) user.instagram = data.instagram ?? null;
+    // keep the relationship member view in sync
+    if (user.relationshipId) {
+      const rel = this.relationships.get(user.relationshipId);
+      const member = rel?.members.find((m) => m.id === userId);
+      if (member) {
+        member.name = user.name;
+        member.avatarUrl = user.avatarUrl ?? null;
+        member.whatsapp = user.whatsapp;
+        member.github = user.github;
+        member.instagram = user.instagram;
+      }
+    }
     return user;
   }
 
@@ -249,6 +274,7 @@ export class DemoStore implements DataStore {
       constellationY: input.constellationY ?? 0.2 + Math.random() * 0.5,
       chapterId: input.chapterId ?? null,
       milestone: input.milestoneLabel ? { label: input.milestoneLabel } : null,
+      status: input.status ?? "verified",
     };
     const list = this.memoriesByRel.get(relationshipId) ?? [];
     list.push(memory);
@@ -270,6 +296,7 @@ export class DemoStore implements DataStore {
     if (data.neverTold !== undefined) memory.neverTold = data.neverTold;
     if (data.milestoneLabel !== undefined)
       memory.milestone = data.milestoneLabel ? { label: data.milestoneLabel } : null;
+    if (data.status !== undefined) memory.status = data.status;
     memory.updatedAt = new Date().toISOString();
     return memory;
   }
@@ -675,4 +702,4 @@ export class DemoStore implements DataStore {
 }
 
 export const demoStore = new DemoStore();
-void ALEX;
+void LINHO;

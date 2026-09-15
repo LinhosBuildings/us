@@ -3,8 +3,9 @@ import Link from "next/link";
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
 import { RelationshipCounter } from "@/components/relationship-counter";
+import { computeCounter } from "@/lib/relationship-counter";
 import { Constellation } from "@/components/constellation";
-import { Card, SectionLabel, Button, Pill } from "@/components/ui";
+import { Card, SectionLabel, Button, Pill, MemoryStatusPill } from "@/components/ui";
 import { formatDate, pluralize } from "@/lib/utils";
 
 const EXPLORE = [
@@ -29,6 +30,8 @@ export default async function HomePage() {
   const goals = rel ? await store.listGoals(rel.id) : [];
   const capsules = rel ? await store.listTimeCapsules(rel.id) : [];
   const partner = rel?.members.find((m) => m.id !== user.id);
+  const unfinished = memories.filter((m) => m.status && m.status !== "verified");
+  const counterSnapshot = rel ? computeCounter(rel.startDate) : undefined;
 
   return (
     <div className="space-y-10 pb-24 md:pb-0">
@@ -41,7 +44,7 @@ export default async function HomePage() {
         {rel?.description ? <p className="mx-auto max-w-md text-sm text-fog">{rel.description}</p> : null}
 
         <Suspense fallback={<div className="h-28" />}>
-          <RelationshipCounter startDate={rel!.startDate} />
+          <RelationshipCounter startDate={rel!.startDate} initial={counterSnapshot} />
         </Suspense>
 
         <p className="font-display text-lg text-fog">
@@ -86,6 +89,31 @@ export default async function HomePage() {
           {rel?.secretCode ? <Pill tone="soft">secret · {rel.secretCode}</Pill> : null}
         </div>
       </Card>
+
+      {/* pages still to be finished */}
+      {unfinished.length > 0 ? (
+        <div className="space-y-4">
+          <div>
+            <SectionLabel>Pages still to be finished</SectionLabel>
+            <p className="mt-1 max-w-lg text-[13px] text-fog">
+              Parts of our story that need completing or confirming. Nothing here was invented — it&rsquo;s waiting for the two of us to write it down properly.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {unfinished.map((m) => (
+              <Link key={m.id} href={`/memories/${m.id}`}>
+                <Card className="group flex items-start justify-between gap-3 p-4 transition-all hover:border-champagne/30">
+                  <span>
+                    <span className="block text-sm font-medium text-ink group-hover:text-champagne-soft">{m.title}</span>
+                    <span className="mt-1 block text-[11px] text-mist">{m.description.slice(0, 120)}</span>
+                  </span>
+                  <MemoryStatusPill status={m.status} />
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="h-8 md:h-0" />
     </div>

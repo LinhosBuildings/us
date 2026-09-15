@@ -35,13 +35,16 @@ export interface CreateMemoryInput {
   constellationY?: number | null;
   chapterId?: string | null;
   milestoneLabel?: string | null;
+  status?: Memory["status"];
 }
 
 export interface DataStore {
   // ── Users & auth ────────────────────────────────────────────
   findUserByEmail(email: string): Promise<User | null>;
   findUserById(id: string): Promise<User | null>;
-  createUser(data: { name: string; email: string; passwordHash: string }): Promise<User>;
+  createUser(data: { name: string; email: string; passwordHash: string; whatsapp?: string | null; github?: string | null; instagram?: string | null }): Promise<User>;
+  /** update a member's own profile details (name/avatar/contact fields) */
+  updateUserProfile(userId: string, data: { name?: string; avatarUrl?: string | null; whatsapp?: string | null; github?: string | null; instagram?: string | null }): Promise<User | null>;
 
   // ── Relationships ───────────────────────────────────────────
   getRelationship(id: string): Promise<Relationship | null>;

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useRef, useTransition } from "react";
 import { createMemory } from "@/lib/server/memories";
+import { uploadMedia } from "@/lib/server/media";
 import { Button, Input, Textarea, Field, Pill } from "@/components/ui";
 import { MOODS, type MemoryKind } from "@/lib/types";
 
@@ -29,9 +30,32 @@ export function AddMemorySheet({
   const [mood, setMood] = useState<string>("");
   const [chapterId, setChapterId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [media, setMedia] = useState<{ id: string; url: string; name: string }[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
   if (!open) return null;
+
+  async function handleFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    setError(null);
+    for (const file of Array.from(files)) {
+      const fd = new FormData();
+      fd.set("file", file);
+      const result = await uploadMedia(fd);
+      if (result.error) {
+        setError(result.error);
+        continue;
+      }
+      if (result.mediaId) {
+        setMedia((prev) => [...prev, { id: result.mediaId!, url: result.url ?? "", name: file.name }]);
+      }
+    }
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -40,6 +64,7 @@ export function AddMemorySheet({
     formData.set("kind", kind);
     if (mood) formData.set("mood", mood);
     if (chapterId) formData.set("chapterId", chapterId);
+    if (media.length > 0) formData.set("mediaIds", media.map((m) => m.id).join(","));
     startTransition(async () => {
       const result = await createMemory({}, formData);
       if (result?.error) {
@@ -48,6 +73,10 @@ export function AddMemorySheet({
         window.location.reload();
       }
     });
+  }
+
+  function removeMedia(id: string) {
+    setMedia((prev) => prev.filter((m) => m.id !== id));
   }
 
   return (
@@ -145,11 +174,46 @@ export function AddMemorySheet({
             </Field>
           ) : null}
 
+          <Field label="Media" hint="Photos, videos, voice notes — up to 15MB each">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,video/*,audio/*"
+              multiple
+              onChange={(e) => void handleFiles(e.target.files)}
+              className="block w-full text-[13px] text-mist file:mr-3 file:rounded-full file:border-0 file:bg-champagne-faint/40 file:px-3 file:py-1.5 file:text-[12px] file:text-champagne-soft hover:file:bg-champagne-faint/70"
+            />
+            {uploading ? <p className="mt-2 text-[12px] text-mist">Uploading…</p> : null}
+            {media.length > 0 ? (
+              <ul className="mt-3 space-y-2">
+                {media.map((m) => (
+                  <li key={m.id} className="flex items-center gap-3 rounded-xl border border-line bg-void/40 px-3 py-2">
+                    {m.url && !m.url.startsWith("data:video") && !m.url.includes("/video") ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={m.url} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                    ) : (
+                      <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-panel text-[10px] text-mist">MEDIA</span>
+                    )}
+                    <span className="flex-1 truncate text-[13px] text-ivory">{m.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeMedia(m.id)}
+                      className="text-[12px] text-fog hover:text-ember"
+                      aria-label={`Remove ${m.name}`}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </Field>
+
           <div className="flex items-center justify-between gap-2">
-            <textarea hidden name="mediaIds" readOnly value="" />
+            <textarea hidden name="mediaIds" readOnly value={media.map((m) => m.id).join(",")} />
             <textarea hidden name="neverTold" readOnly value="" />
-            <span className="text-[11px] text-mist">Media uploads arrive in the next step.</span>
-            <Button type="submit" size="sm" disabled={pending}>
+            <span className="text-[11px] text-mist">{media.length > 0 ? `${media.length} attached` : "No media"}</span>
+            <Button type="submit" size="sm" disabled={pending || uploading}>
               {pending ? "Saving…" : "Save memory"}
             </Button>
           </div>

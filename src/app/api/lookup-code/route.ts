@@ -11,6 +11,6 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     code: rel.code,
     relationshipName: rel.name,
-    invitedBy: owner?.name ?? "Alex & Maya",
+    invitedBy: owner?.name ?? rel.name,
   });
 }

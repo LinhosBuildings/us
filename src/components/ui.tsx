@@ -2,6 +2,7 @@ import { forwardRef } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { twMerge } from "tailwind-merge";
+import type { Memory } from "@/lib/types";
 
 const cnx = (...inputs: (string | undefined | null | false)[]) => twMerge(cn(...inputs));
 
@@ -193,6 +194,29 @@ export function Pill({
     >
       {children}
     </span>
+  );
+}
+
+/* ── Memory verification status ────────────────────────────── */
+
+export function MemoryStatusPill({
+  status,
+  className,
+}: {
+  status?: Memory["status"] | null;
+  className?: string;
+}) {
+  if (!status || status === "verified") return null;
+  const tones = {
+    "needs-confirmation": { tone: "ember" as const, label: "Details to confirm" },
+    incomplete: { tone: "neutral" as const, label: "To be written" },
+  } as const;
+  const meta = tones[status] ?? null;
+  if (!meta) return null;
+  return (
+    <Pill tone={meta.tone} className={className}>
+      {meta.label}
+    </Pill>
   );
 }
 

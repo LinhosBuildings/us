@@ -56,11 +56,11 @@ const updateSchema = z.object({
   coverImageUrl: z.string().optional(),
 });
 
-export async function updateRelationship(formData: FormData) {
+export async function updateRelationship(formData: FormData): Promise<void> {
   const user = await requireUser();
   const store = await getStore();
   const rel = await store.getRelationshipForUser(user.id);
-  if (!rel) return { error: "No relationship yet." };
+  if (!rel) return;
 
   const parsed = updateSchema.safeParse({
     partnerName: formData.get("partnerName"),
@@ -69,7 +69,7 @@ export async function updateRelationship(formData: FormData) {
     description: formData.get("description"),
     coverImageUrl: formData.get("coverImageUrl"),
   });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+  if (!parsed.success) return;
 
   const next: Record<string, string> = {};
   if (parsed.data.partnerName) {
@@ -84,9 +84,9 @@ export async function updateRelationship(formData: FormData) {
   if (parsed.data.description !== undefined) next.description = parsed.data.description;
   if (parsed.data.coverImageUrl !== undefined && parsed.data.coverImageUrl !== "") next.coverImageUrl = parsed.data.coverImageUrl;
 
-  const updated = await store.updateRelationship(rel.id, next);
+  await store.updateRelationship(rel.id, next);
   revalidatePath("/", "page");
-  return { success: true, code: updated?.code };
+  revalidatePath("/settings");
 }
 
 export async function joinRelationship(code: string) {

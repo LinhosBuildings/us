@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
-import { Card, SectionLabel, Pill } from "@/components/ui";
+import { Card, SectionLabel, Pill, MemoryStatusPill } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
-import { Button } from "@/components/ui";
+import { MediaGallery } from "@/components/media-gallery";
 
 export default async function MemoryDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -32,6 +32,7 @@ export default async function MemoryDetailPage({ params }: { params: Promise<{ i
         <div className="flex flex-wrap items-center gap-2">
           <Pill tone="gold">{memory.kind}</Pill>
           {memory.mood ? <Pill>{memory.mood}</Pill> : null}
+          <MemoryStatusPill status={memory.status} />
           {memory.visibility === "me-only" ? <Pill tone="ember">Private</Pill> : null}
           <span className="text-[11px] text-mist">{formatDate(memory.date)}</span>
           <span className="text-[11px] text-fog">by {memory.createdByName}</span>
@@ -50,20 +51,7 @@ export default async function MemoryDetailPage({ params }: { params: Promise<{ i
 
       {/* media */}
       {memory.media.length > 0 ? (
-        <div className="grid grid-cols-2 gap-2">
-          {memory.media.map((m) => (
-            <Card key={m.id} className="overflow-hidden">
-              {m.type === "image" ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={m.url} alt="" className="aspect-[4/3] w-full object-cover" />
-              ) : m.type === "video" ? (
-                <div className="aspect-video flex items-center justify-center bg-panel/50 text-mist text-xs">Video</div>
-              ) : (
-                <div className="aspect-[4/3] flex items-center justify-center bg-panel/50 text-mist text-xs">Voice note</div>
-              )}
-            </Card>
-          ))}
-        </div>
+        <MediaGallery items={memory.media} />
       ) : null}
 
       {/* description */}

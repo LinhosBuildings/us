@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getStore } from "@/lib/data/contracts";
 import { createSession, destroySession, hashPassword, requireUser } from "@/lib/server/session";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { uid } from "@/lib/utils";
 import { svgAvatar } from "@/lib/data/demo-art";
 
@@ -87,30 +88,123 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
 }
 
 export async function logout() {
+  if (process.env.NEXT_PUBLIC_APP_MODE === "prod") {
+    const { isSupabaseConfigured } = await import("@/lib/supabase/admin");
+    if (isSupabaseConfigured()) {
+      const { supabaseServer } = await import("@/lib/server/auth-prod");
+      const sb = await supabaseServer();
+      await sb.auth.signOut();
+    }
+  }
   await destroySession();
   redirect("/login");
 }
 
-export async function updateProfile(formData: FormData) {
+/* ── Production (Supabase Auth) actions ────────────────────────
+ * Used only when NEXT_PUBLIC_APP_MODE=prod. Demo mode keeps the
+ * shared-secret login above.
+ */
+
+export type ProdLoginState = { error?: string };
+
+export async function prodLogin(_prev: ProdLoginState, formData: FormData): Promise<ProdLoginState> {
+  if ([...formData.keys()].length === 0) return {};
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  if (!email || !password) return { error: "Enter your email and password." };
+  const { isSupabaseConfigured } = await import("@/lib/supabase/admin");
+  if (!isSupabaseConfigured()) {
+    return { error: "Production auth isn't configured yet. Add your Supabase keys or run in demo mode." };
+  }
+  const { supabaseServer } = await import("@/lib/server/auth-prod");
+  const sb = await supabaseServer();
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    return { error: error.message === "Invalid login credentials" ? "That email and password didn't match." : error.message };
+  }
+  redirect("/home");
+}
+
+export type ProdSignupState = { error?: string; notice?: string };
+
+export async function prodSignup(_prev: ProdSignupState, formData: FormData): Promise<ProdSignupState> {
+  if ([...formData.keys()].length === 0) return {};
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  if (name.length < 2) return { error: "Tell us your name." };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "That email doesn't look right." };
+  if (password.length < 8) return { error: "At least 8 characters." };
+  const { isSupabaseConfigured } = await import("@/lib/supabase/admin");
+  if (!isSupabaseConfigured()) {
+    return { error: "Production auth isn't configured yet. Add your Supabase keys or run in demo mode." };
+  }
+  const { supabaseServer } = await import("@/lib/server/auth-prod");
+  const sb = await supabaseServer();
+  const { data, error } = await sb.auth.signUp({ email, password, options: { data: { name } } });
+  if (error) return { error: error.message };
+
+  const store = await getStore();
+  const existing = await store.findUserByEmail(email);
+  if (!existing) {
+    await store.createUser({ name, email, passwordHash: "" });
+  }
+
+  if (data.session) {
+    redirect("/setup");
+  }
+  return { notice: "Check your email to confirm your account, then sign in." };
+}
+
+export type ProdResetState = { error?: string; notice?: string };
+
+export async function prodForgotPassword(_prev: ProdResetState, formData: FormData): Promise<ProdResetState> {
+  if ([...formData.keys()].length === 0) return {};
+  const email = String(formData.get("email") ?? "").trim();
+  if (!email) return { error: "Enter your email." };
+  const { isSupabaseConfigured } = await import("@/lib/supabase/admin");
+  if (!isSupabaseConfigured()) return { error: "Production auth isn't configured yet." };
+  const { supabaseServer } = await import("@/lib/server/auth-prod");
+  const sb = await supabaseServer();
+  const base = process.env.NEXT_PUBLIC_APP_URL || "";
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: `${base}/auth/update-password`,
+  });
+  if (error) return { error: error.message };
+  return { notice: "If that account exists, a reset link is on its way." };
+}
+
+export async function prodUpdatePassword(_prev: ProdResetState, formData: FormData): Promise<ProdResetState> {
+  if ([...formData.keys()].length === 0) return {};
+  const password = String(formData.get("password") ?? "");
+  if (password.length < 8) return { error: "At least 8 characters." };
+  const { isSupabaseConfigured } = await import("@/lib/supabase/admin");
+  if (!isSupabaseConfigured()) return { error: "Production auth isn't configured yet." };
+  const { supabaseServer } = await import("@/lib/server/auth-prod");
+  const sb = await supabaseServer();
+  const { error } = await sb.auth.updateUser({ password });
+  if (error) return { error: error.message };
+  redirect("/login");
+}
+
+export async function updateProfile(formData: FormData): Promise<void> {
   const user = await requireUser();
   const store = await getStore();
   const name = String(formData.get("name") ?? "").trim().slice(0, 80);
-  if (!name) return { error: "Name is required." };
-  if (!user.relationshipId) return { error: "No relationship." };
-
-  // Update member display name in the relationship
-  const rel = await store.getRelationship(user.relationshipId);
-  if (rel) {
-    const member = rel.members.find((x) => x.id === user.id);
-    if (member) member.name = name;
+  if (!name) {
+    revalidatePath("/settings");
+    return;
   }
-  user.name = name;
 
   const avatar = formData.get("avatarUrl");
-  if (avatar && typeof avatar === "string") {
-    user.avatarUrl = avatar.slice(0, 2000);
-  }
-  return {};
+  const avatarUrl = avatar && typeof avatar === "string" ? avatar.slice(0, 2000) : null;
+
+  const whatsapp = String(formData.get("whatsapp") ?? "").trim().slice(0, 60) || null;
+  const github = String(formData.get("github") ?? "").trim().slice(0, 120) || null;
+  const instagram = String(formData.get("instagram") ?? "").trim().slice(0, 120) || null;
+
+  await store.updateUserProfile(user.id, { name, avatarUrl: avatarUrl ?? null, whatsapp, github, instagram });
+  revalidatePath("/settings");
 }
 
 export async function changePassword(formData: FormData) {
@@ -146,7 +240,7 @@ export async function resetPassword(formData: FormData) {
   const user = await store.findUserByEmail(email);
   if (!user) return { error: "If that account exists, we've sent a reset link." };
   const { hashPassword: hp, verifyPassword } = await import("@/lib/server/session");
-  if (user.relationshipId === "rel_demo") {
+  if (user.relationshipId === "rel_bl") {
     // seeded demo account — restore the documented demo password
     user.passwordHash = "demo-seeded";
   } else {
@@ -173,7 +267,7 @@ export async function getInvitationByCode(code: string) {
   return {
     code: rel.code,
     relationshipName: rel.name,
-    invitedBy: owner?.name ?? "Alex & Maya",
+    invitedBy: owner?.name ?? rel.name,
     relationshipId: rel.id,
   };
 }

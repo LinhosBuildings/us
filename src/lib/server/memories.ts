@@ -25,6 +25,7 @@ const createMemorySchema = z.object({
   constellationY: z.number().min(0).max(1).optional().nullable(),
   chapterId: z.string().optional().nullable(),
   milestoneLabel: z.string().trim().max(120).optional().nullable(),
+  status: z.enum(["verified", "needs-confirmation", "incomplete"]).optional().nullable(),
 });
 
 export type MemoryActionState = { error?: string };
@@ -48,6 +49,7 @@ export async function createMemory(_prev: MemoryActionState, formData: FormData)
     neverTold: formData.get("neverTold") || null,
     chapterId: formData.get("chapterId") || null,
     milestoneLabel: formData.get("milestoneLabel") || null,
+    status: formData.get("status") || null,
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Please check the details." };
 
@@ -72,6 +74,7 @@ export async function createMemory(_prev: MemoryActionState, formData: FormData)
     constellationY: parsed.data.constellationY,
     chapterId: parsed.data.chapterId,
     milestoneLabel: parsed.data.milestoneLabel,
+    status: parsed.data.status ?? "verified",
   });
   revalidatePath("/", "page");
   return {};
@@ -88,6 +91,11 @@ export async function updateMemory(memoryId: string, formData: FormData) {
   const date = String(formData.get("date") ?? memory.date);
   const locationName = String(formData.get("locationName") ?? "") || null;
   const visibility: Memory["visibility"] = formData.get("visibility") === "me-only" ? "me-only" : "both";
+  const rawStatus = String(formData.get("status") ?? "");
+  const status: Memory["status"] =
+    rawStatus === "verified" || rawStatus === "needs-confirmation" || rawStatus === "incomplete"
+      ? rawStatus
+      : memory.status ?? null;
 
   const rel = await store.updateMemory(relationship.id, memoryId, {
     title,
@@ -96,6 +104,7 @@ export async function updateMemory(memoryId: string, formData: FormData) {
     locationName,
     visibility,
     neverTold: memory.neverTold,
+    status,
   });
   if (rel) revalidatePath("/memories/" + memoryId, "page");
   return {};

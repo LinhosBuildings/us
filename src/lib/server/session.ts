@@ -7,6 +7,10 @@ import { getStore, type DataStore } from "@/lib/data/contracts";
 const COOKIE_NAME = "us_session";
 const TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
+function isProdMode(): boolean {
+  return process.env.NEXT_PUBLIC_APP_MODE === "prod";
+}
+
 export function hashPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");
   const hash = scryptSync(password, salt, 64).toString("hex");
@@ -72,6 +76,19 @@ export async function destroySession() {
 }
 
 export async function getSessionUserId(): Promise<string | null> {
+  if (isProdMode()) {
+    // Production: authenticate against Supabase Auth, then resolve our app
+    // user by email (the store enforces relationship membership).
+    const { supabaseServer } = await import("@/lib/server/auth-prod");
+    const sb = await supabaseServer();
+    const { data } = await sb.auth.getUser();
+    const sbUser = data?.user;
+    if (!sbUser?.email) return null;
+    const store = await getStore();
+    const appUser = await store.findUserByEmail(sbUser.email);
+    return appUser?.id ?? null;
+  }
+  // Demo: HMAC-signed cookie session
   const jar = await cookies();
   const token = jar.get(COOKIE_NAME)?.value;
   if (!token) return null;
