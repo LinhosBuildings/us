@@ -1,0 +1,229 @@
+@import "tailwindcss";
+@import "@fontsource/cormorant-garamond/400.css";
+@import "@fontsource/cormorant-garamond/500.css";
+@import "@fontsource/cormorant-garamond/600.css";
+@import "@fontsource/cormorant-garamond/700.css";
+@import "@fontsource/cormorant-garamond/400-italic.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+
+@theme {
+  /* ── Palette ─────────────────────────────────────────────── */
+  --color-midnight: #07070a;
+  --color-void: #0b0b10;
+  --color-abyss: #101018;
+  --color-panel: #15151e;
+  --color-raised: #1b1b26;
+  --color-line: rgba(236, 234, 227, 0.08);
+  --color-line-strong: rgba(236, 234, 227, 0.16);
+
+  --color-ink: #ecebe3;
+  --color-ivory: #f4f2ea;
+  --color-fog: #98959f;
+  --color-mist: #6f6c78;
+
+  --color-champagne: #c9a961;
+  --color-champagne-soft: #ddc693;
+  --color-champagne-faint: rgba(201, 169, 97, 0.14);
+  --color-ember: #c97d5f;
+  --color-sage: #7d8f7b;
+  --color-nightsky: #5b6478;
+
+  /* ── Typography ──────────────────────────────────────────── */
+  --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* ── Motion ──────────────────────────────────────────────── */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.35, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─────────────────────────── Base ─────────────────────────── */
+
+* {
+  border-color: var(--color-line);
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-midnight);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(201, 169, 97, 0.28);
+  color: var(--color-ivory);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(236, 234, 227, 0.12);
+  border-radius: 999px;
+  border: 2px solid var(--color-midnight);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 169, 97, 0.4);
+}
+
+/* ─────────────────────── Utilities ────────────────────────── */
+
+@utility grain {
+  position: relative;
+}
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@utility glass {
+  background: rgba(16, 16, 24, 0.55);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid rgba(236, 234, 227, 0.08);
+}
+
+@utility hairline {
+  border: 1px solid rgba(236, 234, 227, 0.08);
+}
+
+@utility glow-champagne {
+  box-shadow:
+    0 0 0 1px rgba(201, 169, 97, 0.18),
+    0 10px 40px -10px rgba(201, 169, 97, 0.25),
+    0 0 90px -20px rgba(201, 169, 97, 0.35);
+}
+
+@utility text-gradient-gold {
+  background: linear-gradient(120deg, #ecebe3 0%, #ddc693 45%, #c9a961 70%, #8d7a48 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility text-pretty {
+  text-wrap: pretty;
+}
+
+/* Constellation helpers (client components set positions inline) */
+@utility star-point {
+  border-radius: 9999px;
+  box-shadow: 0 0 6px 1px currentColor;
+}
+
+/* Editorial rule: a thin center divider with a diamond */
+@utility editorial-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+.editorial-rule::before,
+.editorial-rule::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, rgba(201, 169, 97, 0.35));
+}
+.editorial-rule::after {
+  background: linear-gradient(90deg, rgba(201, 169, 97, 0.35), transparent);
+}
+
+/* ───────────────────── Animations ─────────────────────────── */
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes drift {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-40px, -20px, 0); }
+}
+
+@keyframes slow-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.35); opacity: 1; }
+}
+
+.animate-twinkle { animation: twinkle 4s var(--ease-out-quart) infinite; }
+.animate-float-slow { animation: float-slow 7s ease-in-out infinite; }
+.animate-drift { animation: drift 24s linear infinite; }
+.animate-slow-zoom { animation: slow-zoom 24s var(--ease-out-quart) forwards; }
+.animate-pulse-soft { animation: pulse-soft 3.2s ease-in-out infinite; }
+.animate-breathe { animation: breathe 3.4s var(--ease-out-quart) infinite; }
+
+/* ─────────────────── Reduced motion ───────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Hide scrollbars for carousel rows */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Focus visibility */
+:focus-visible {
+  outline: 2px solid rgba(201, 169, 97, 0.7);
+  outline-offset: 3px;
+  border-radius: 2px;
+}

@@ -1,0 +1,65 @@
+import { requireUser } from "@/lib/server/session";
+import { getStore } from "@/lib/data/contracts";
+import { Card, SectionLabel, Pill, EmptyState } from "@/components/ui";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  love: "Love",
+  career: "Career",
+  home: "Home",
+  travel: "Travel",
+  finances: "Finances",
+  family: "Family",
+  adventures: "Adventures",
+};
+
+export default async function FuturePage() {
+  const user = await requireUser();
+  const store = await getStore();
+  const rel = await store.getRelationshipForUser(user.id);
+  if (!rel) return null;
+  const goals = await store.listGoals(rel.id);
+  const sorted = [...goals].sort((a, b) => (a.completed ? 1 : 0) - (b.completed ? 1 : 0));
+
+  return (
+    <div className="space-y-8 pb-24 md:pb-0">
+      <div>
+        <SectionLabel>The Future Tree</SectionLabel>
+        <h1 className="font-display text-3xl font-medium text-ivory">Our Future</h1>
+        <p className="mt-1 max-w-lg text-sm text-fog">
+          A place to hold dreams — small, big, concrete, impossible — and say them out loud together.
+        </p>
+      </div>
+
+      {goals.length === 0 ? (
+        <EmptyState
+          eyebrow="Empty"
+          title="The future is unwritten"
+          body="Dream something together. Say it out loud. Make it real."
+        />
+      ) : null}
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {sorted.map((g) => (
+          <Card key={g.id} className={`p-5 ${g.completed ? "opacity-60" : ""}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <Pill tone={g.completed ? "sage" : "gold"}>{CATEGORY_LABELS[g.category] ?? g.category}</Pill>
+              {g.completed ? <Pill tone="sage">Done</Pill> : null}
+            </div>
+            <h3 className="text-sm font-medium text-ivory">{g.title}</h3>
+            {g.description ? <p className="mt-1 text-xs text-fog">{g.description}</p> : null}
+            {!g.completed && g.progress > 0 ? (
+              <div className="mt-3 h-1 rounded-full bg-line">
+                <div className="h-full rounded-full bg-champagne/60" style={{ width: `${Math.min(100, g.progress)}%` }} />
+              </div>
+            ) : null}
+            {g.targetDate ? (
+              <p className="mt-2 text-[11px] text-mist">
+                Target: {new Date(g.targetDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+              </p>
+            ) : null}
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
