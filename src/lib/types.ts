@@ -104,6 +104,15 @@ export interface Perspective {
   createdAt: string;
 }
 
+export interface Message {
+  id: string;
+  relationshipId: string;
+  authorId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+}
+
 export interface Chapter {
   id: string;
   relationshipId: string;

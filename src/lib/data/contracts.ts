@@ -7,6 +7,7 @@ import type {
   Letter,
   LittleThing,
   Memory,
+  Message,
   OpenWhenEntry,
   Perspective,
   Place,
@@ -73,6 +74,10 @@ export interface DataStore {
   // ── Perspectives ────────────────────────────────────────────
   listPerspectives(relationshipId: string, memoryId: string): Promise<Perspective[]>;
   addPerspective(relationshipId: string, memoryId: string, authorId: string, text: string): Promise<Perspective>;
+
+  // ── Messages (private chat between the two of you) ───────────
+  listMessages(relationshipId: string): Promise<Message[]>;
+  sendMessage(relationshipId: string, authorId: string, body: string): Promise<Message>;
 
   // ── Chapters ────────────────────────────────────────────────
   listChapters(relationshipId: string): Promise<Chapter[]>;

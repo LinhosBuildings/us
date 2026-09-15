@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
+import Link from "next/link";
 import { Card, SectionLabel, Pill, EmptyState } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
 
@@ -19,6 +20,13 @@ export default async function WorldPage() {
         <p className="mt-1 max-w-lg text-sm text-fog">
           A map of your shared world — places, stories, the geography of your relationship.
         </p>
+      </div>
+
+      <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1">
+        <CornerLink href="/world" label="Places" active />
+        <CornerLink href="/firsts" label="Firsts" />
+        <CornerLink href="/little-things" label="Little Things" />
+        <CornerLink href="/soundtrack" label="Soundtrack" />
       </div>
 
       {places.length === 0 ? (
@@ -50,4 +58,11 @@ export default async function WorldPage() {
       </div>
     </div>
   );
+}
+
+function CornerLink({ href, label, active }: { href: string; label: string; active?: boolean }) {
+  const cls = active
+    ? "whitespace-nowrap rounded-full border border-champagne/40 bg-champagne-faint px-3.5 py-1.5 text-[12px] text-champagne-soft"
+    : "whitespace-nowrap rounded-full border border-line-strong px-3.5 py-1.5 text-[12px] text-fog transition-colors hover:border-champagne/40 hover:text-champagne-soft";
+  return <Link href={href} className={cls}>{label}</Link>;
 }

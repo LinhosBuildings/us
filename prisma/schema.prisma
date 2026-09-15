@@ -38,6 +38,7 @@ model User {
   reflections        Reflection[]
   survived           SurvivedEntry[]
   perspectives       Perspective[]
+  messages           Message[]
 
   @@index([relationshipId])
 }
@@ -69,6 +70,7 @@ model Relationship {
   reflections    Reflection[]
   survived       SurvivedEntry[]
   mediaAssets    MediaAsset[]
+  messages       Message[]
 
   @@index([code])
 }
@@ -400,6 +402,19 @@ model TimeCapsuleMedia {
 }
 
 // ── Reflections & survived ────────────────────────────────────
+
+model Message {
+  id             String @id @default(cuid())
+  relationshipId String
+  authorId       String
+  authorName     String
+  body           String
+  createdAt      DateTime @default(now())
+  author         User    @relation(fields: [authorId], references: [id])
+  relationship   Relationship @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
+
+  @@index([relationshipId, createdAt])
+}
 
 model Reflection {
   id             String @id @default(cuid())

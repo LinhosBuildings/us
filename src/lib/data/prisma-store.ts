@@ -752,6 +752,28 @@ const code = this.generateCode();
     return this.listTimeCapsules(relationshipId).then((l) => l.find((c) => c.id === row.id)!);
   }
 
+  // ── Messages ──────────────────────────────────────────────
+
+  async listMessages(relationshipId: string): Promise<Message[]> {
+    const rows = await this.db.message.findMany({ where: { relationshipId }, orderBy: { createdAt: "asc" } });
+    return rows.map((r) => ({
+      id: r.id,
+      relationshipId: r.relationshipId,
+      authorId: r.authorId,
+      authorName: r.authorName,
+      body: r.body,
+      createdAt: r.createdAt.toISOString(),
+    }));
+  }
+
+  async sendMessage(relationshipId: string, authorId: string, body: string): Promise<Message> {
+    const author = await this.db.user.findUnique({ where: { id: authorId } });
+    const row = await this.db.message.create({
+      data: { relationshipId, authorId, authorName: author?.name ?? "Someone", body },
+    });
+    return { id: row.id, relationshipId, authorId: row.authorId, authorName: row.authorName, body: row.body, createdAt: row.createdAt.toISOString() };
+  }
+
   // ── Reflections ─────────────────────────────────────────────
 
   async listReflections(relationshipId: string): Promise<Reflection[]> {

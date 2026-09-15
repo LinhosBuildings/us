@@ -26,6 +26,11 @@ export default async function StoryPage() {
         </p>
       </div>
 
+      <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1">
+        <StoryLink href="/story" label="Chapters" active />
+        <StoryLink href="/survived" label="What We've Been Through" />
+      </div>
+
       {chapters.length === 0 && ungrouped.length === 0 ? (
         <EmptyState
           eyebrow="No chapters yet"
@@ -88,4 +93,11 @@ export default async function StoryPage() {
       ) : null}
     </div>
   );
+}
+
+function StoryLink({ href, label, active }: { href: string; label: string; active?: boolean }) {
+  const cls = active
+    ? "whitespace-nowrap rounded-full border border-champagne/40 bg-champagne-faint px-3.5 py-1.5 text-[12px] text-champagne-soft"
+    : "whitespace-nowrap rounded-full border border-line-strong px-3.5 py-1.5 text-[12px] text-fog transition-colors hover:border-champagne/40 hover:text-champagne-soft";
+  return <Link href={href} className={cls}>{label}</Link>;
 }

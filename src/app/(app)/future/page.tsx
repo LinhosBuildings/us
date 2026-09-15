@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
+import Link from "next/link";
 import { Card, SectionLabel, Pill, EmptyState } from "@/components/ui";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -28,6 +29,13 @@ export default async function FuturePage() {
         <p className="mt-1 max-w-lg text-sm text-fog">
           A place to hold dreams — small, big, concrete, impossible — and say them out loud together.
         </p>
+      </div>
+
+      <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1">
+        <FutureLink href="/future" label="Goals" active />
+        <FutureLink href="/time-capsules" label="Time Capsules" />
+        <FutureLink href="/anniversary" label="Anniversary" />
+        <FutureLink href="/forever" label="Forever" />
       </div>
 
       {goals.length === 0 ? (
@@ -62,4 +70,11 @@ export default async function FuturePage() {
       </div>
     </div>
   );
+}
+
+function FutureLink({ href, label, active }: { href: string; label: string; active?: boolean }) {
+  const cls = active
+    ? "whitespace-nowrap rounded-full border border-champagne/40 bg-champagne-faint px-3.5 py-1.5 text-[12px] text-champagne-soft"
+    : "whitespace-nowrap rounded-full border border-line-strong px-3.5 py-1.5 text-[12px] text-fog transition-colors hover:border-champagne/40 hover:text-champagne-soft";
+  return <Link href={href} className={cls}>{label}</Link>;
 }

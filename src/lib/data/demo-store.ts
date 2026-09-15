@@ -8,6 +8,7 @@ import type {
   LittleThing,
   MediaAsset,
   Memory,
+  Message,
   OpenWhenEntry,
   Perspective,
   Place,
@@ -54,6 +55,7 @@ export class DemoStore implements DataStore {
   relationships = new Map<string, Relationship>();
   memoriesByRel = new Map<string, Memory[]>();
   perspectives: Perspective[] = [];
+  messagesByRel = new Map<string, Message[]>();
   chaptersByRel = new Map<string, Chapter[]>();
   lettersByRel = new Map<string, Letter[]>();
   openWhenByRel = new Map<string, OpenWhenEntry[]>();
@@ -79,6 +81,7 @@ export class DemoStore implements DataStore {
     this.chaptersByRel.set(REL, seedChapters);
     this.memoriesByRel.set(REL, seedMemories);
     this.perspectives.push(...seedPerspectives);
+    this.messagesByRel.set(REL, []);
     this.lettersByRel.set(REL, seedLetters);
     this.openWhenByRel.set(REL, seedOpenWhen);
     this.confessionsByRel.set(REL, seedConfessions);
@@ -197,6 +200,7 @@ export class DemoStore implements DataStore {
     for (const [k, v] of Object.entries({
       memoriesByRel: [],
       lettersByRel: [],
+      messagesByRel: [],
       openWhenByRel: [],
       confessionsByRel: [],
       dictionaryByRel: [],
@@ -338,6 +342,31 @@ export class DemoStore implements DataStore {
     };
     this.perspectives.push(perspective);
     return perspective;
+  }
+
+  /* ── messages ──────────────────────────────────────────────── */
+  async listMessages(relationshipId: string) {
+    return [...(this.messagesByRel.get(relationshipId) ?? [])].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+  }
+  async sendMessage(relationshipId: string, authorId: string, body: string) {
+    const rel = this.relationships.get(relationshipId);
+    if (!rel) throw new Error("Relationship not found");
+    if (!rel.members.some((m) => m.id === authorId)) throw new Error("Not a member of this relationship");
+    const author = this.users.get(authorId);
+    const message: Message = {
+      id: uid("msg"),
+      relationshipId,
+      authorId,
+      authorName: author?.name ?? "Someone",
+      body,
+      createdAt: new Date().toISOString(),
+    };
+    const list = this.messagesByRel.get(relationshipId) ?? [];
+    list.push(message);
+    this.messagesByRel.set(relationshipId, list);
+    return message;
   }
 
   /* ── chapters ──────────────────────────────────────────────── */
