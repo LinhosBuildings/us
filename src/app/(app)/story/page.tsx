@@ -13,16 +13,15 @@ export default async function StoryPage() {
   const chapters = await store.listChapters(rel.id);
   const memories = await store.listMemories(rel.id);
 
-  const memoriesByChapter = (chapterId: string) =>
-    memories.filter((m) => m.chapterId === chapterId).sort((a, b) => a.date.localeCompare(b.date));
+  const countFor = (id: string) => memories.filter((m) => m.chapterId === id).length;
   const ungrouped = memories.filter((m) => !m.chapterId).sort((a, b) => a.date.localeCompare(b.date));
 
   return (
     <div className="space-y-8 pb-24 md:pb-0">
-      <div>
+      <div className="text-center">
         <SectionLabel>Relive Our Story</SectionLabel>
         <h1 className="font-display text-3xl font-medium text-ivory">Our Story</h1>
-        <p className="mt-1 max-w-lg text-sm text-fog">
+        <p className="mx-auto mt-1 max-w-lg text-sm text-fog">
           Every relationship has a shape. A beginning, a deepening, chapters you&rsquo;re still writing.
         </p>
       </div>
@@ -36,34 +35,40 @@ export default async function StoryPage() {
         />
       ) : null}
 
-      {chapters.map((ch) => {
-        const chMemories = memoriesByChapter(ch.id);
-        return (
-          <div key={ch.id} className="space-y-4">
-            <div className="editorial-rule">
-              <span className="font-display text-xl font-medium text-ivory">{ch.title}</span>
-            </div>
-            {ch.intro ? <p className="mx-auto max-w-lg text-center text-sm italic text-fog">{ch.intro}</p> : null}
-            {chMemories.length === 0 ? (
-              <p className="text-center text-xs text-mist">No memories in this chapter yet</p>
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {chMemories.map((m) => (
-                  <Link key={m.id} href={`/memories/${m.id}`}>
-                    <Card className="group p-4 transition-all hover:border-champagne/30">
-                      <Pill tone="gold" className="mb-2">{m.kind}</Pill>
-                      <h3 className="text-sm font-medium text-ink group-hover:text-champagne-soft">{m.title}</h3>
-                      <p className="mt-1 text-[11px] text-mist">{formatDate(m.date)}</p>
-                    </Card>
-                  </Link>
-                ))}
+      {/* chapter index */}
+      <div className="space-y-3">
+        {chapters.map((ch) => (
+          <Link key={ch.id} href={`/story/${ch.id}`}>
+            <Card className="group flex items-center gap-4 p-5 transition-all hover:border-champagne/30">
+              <span className="hidden font-mono text-[11px] text-champagne/60 sm:block">{ch.order.toString().padStart(2, "0")}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Pill tone="gold">{ch.code}</Pill>
+                  {ch.epigraph ? (
+                    <span className="hidden truncate font-display text-sm italic text-champagne/60 sm:block">
+                      “{ch.epigraph}”
+                    </span>
+                  ) : null}
+                </div>
+                <h3 className="mt-1.5 truncate text-base font-medium text-ink transition-colors group-hover:text-champagne-soft">
+                  {ch.title}
+                </h3>
               </div>
-            )}
-          </div>
-        );
-      })}
+              <div className="shrink-0 text-right">
+                <span className="block font-mono text-[11px] text-mist">
+                  {countFor(ch.id)} {countFor(ch.id) === 1 ? "memory" : "memories"}
+                </span>
+                <span className="mt-1 block text-champagne transition-transform group-hover:translate-x-0.5" aria-hidden>
+                  →
+                </span>
+              </div>
+            </Card>
+          </Link>
+        ))}
+      </div>
 
-      {ungrouped.length > 0 && chapters.length > 0 ? (
+      {/* unassigned memories */}
+      {ungrouped.length > 0 ? (
         <div className="space-y-4">
           <div className="editorial-rule">
             <span className="font-display text-lg text-fog">Unassigned memories</span>
