@@ -69,8 +69,9 @@ export default async function HomePage() {
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="flex flex-col items-center pt-8 pb-12 text-center md:pt-16">
         <p className="animate-heartbeat font-mono text-[11px] uppercase tracking-[0.3em] text-champagne">✦ our orbit ✦</p>
-        <h1 className="mt-4 font-display text-5xl font-medium leading-tight text-ivory md:text-6xl">
-          <span className="text-gradient-love">{rel.name}</span>
+        <h1 className="love-name mt-4 text-center font-display text-6xl font-black leading-none tracking-tight md:text-7xl">
+          {rel.name}
+          <span className="love-heart" aria-hidden>💗</span>
         </h1>
         {rel.description ? <p className="mx-auto mt-4 max-w-md text-base text-fog">{rel.description}</p> : null}
 

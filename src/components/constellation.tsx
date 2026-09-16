@@ -51,6 +51,8 @@ const ROSE_LIGHT = "247, 168, 210";
 const ROSE_WHITE = "255, 255, 255";
 const ROSE_TITLE = "255, 255, 255";
 const GOLD = "240, 178, 94"; // --color-gold #f0b25e
+const GOLD_BRIGHT = "255, 205, 130";
+const GOLD_DEEP = "208, 148, 62";
 const VIOLET = "143, 95, 214"; // --color-nightsky #8f5fd6
 const PLUM = "46, 11, 51"; // --color-ink #2e0b33
 const PLUM_SOFT = "138, 92, 143"; // --color-fog #8a5c8f
@@ -202,7 +204,7 @@ function buildLayout(memories: StarMemory[], chapters: Chapter[], W: number, H: 
         status: m.status ?? null,
         x: m.constellationX! * W,
         y: m.constellationY! * H,
-        r: (imp === 2 ? 9 : imp === 1 ? 6.4 : 4.4) * (0.9 + ((h % 100) / 100) * 0.35),
+        r: (imp === 2 ? 11 : imp === 1 ? 8 : 5.6) * (0.9 + ((h % 100) / 100) * 0.35),
         imp,
         family: familyOf(m.mood),
         lum: luminanceOf(m.mood),
@@ -317,11 +319,11 @@ function buildStaticLayer(layout: Layout, W: number, H: number): HTMLCanvasEleme
     ctx.strokeStyle = `rgba(${GOLD},0.2)`;
     ctx.stroke();
 
-    ctx.font = '8px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.font = '700 12px ui-monospace, SFMono-Regular, Menlo, monospace';
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = `rgba(${PLUM_SOFT},0.9)`;
-    ctx.fillText(cl.chapter.code.toUpperCase(), cl.cx, cl.cy + cl.radius + 15);
+    ctx.fillStyle = `rgba(${PLUM_SOFT},0.95)`;
+    ctx.fillText(cl.chapter.code.toUpperCase(), cl.cx, cl.cy + cl.radius + 19);
   }
 
   // the journey — organic rose threads from the origin through the memories
@@ -342,11 +344,11 @@ function buildStaticLayer(layout: Layout, W: number, H: number): HTMLCanvasEleme
 function tint(s: Star, a: number): string {
   switch (s.family) {
     case "warm":
-      return `rgba(${ROSE},${a})`;
+      return `rgba(${GOLD_BRIGHT},${a})`;
     case "cool":
-      return `rgba(${VIOLET},${Math.min(a * 0.9, 0.7)})`;
+      return `rgba(${GOLD},${Math.min(a * 0.9, 0.7)})`;
     default:
-      return `rgba(${ROSE_SOFT},${a})`;
+      return `rgba(${GOLD_DEEP},${a})`;
   }
 }
 
@@ -423,17 +425,17 @@ function drawOrigin(
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
   if (name) {
-    ctx.font = '700 13px "Nunito Sans", system-ui, sans-serif';
+    ctx.font = '700 14px "Nunito Sans", system-ui, sans-serif';
     ctx.fillStyle = `rgba(${PLUM},0.95)`;
     ctx.fillText(name, origin.x + 20, origin.y - 17);
   }
   if (stamp) {
-    ctx.font = '8px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.font = '700 11px ui-monospace, SFMono-Regular, Menlo, monospace';
     ctx.fillStyle = `rgba(${PLUM_SOFT},0.95)`;
     ctx.fillText(stamp.toUpperCase(), origin.x + 20, origin.y - 1);
   }
   if (caption) {
-    ctx.font = 'italic 700 11px "Nunito Sans", system-ui, sans-serif';
+    ctx.font = 'italic 700 13px "Nunito Sans", system-ui, sans-serif';
     ctx.fillStyle = `rgba(${ROSE},0.95)`;
     ctx.fillText(caption, origin.x + 20, origin.y + 17);
   }
@@ -454,12 +456,16 @@ export function Constellation({
   const router = useRouter();
 
   const [reduced, setReduced] = useState(false);
+  const [coarse, setCoarse] = useState(false);
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
   const [pos, setPos] = useState<{ sx: number; sy: number; w: number; h: number } | null>(null);
+  const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
 
-  const layout = useMemo(() => buildLayout(memories, chapters, W, H), [memories, chapters, W, H]);
+  const Wd = dims && dims.w > 0 ? dims.w : W;
+  const Hd = dims && dims.h > 0 ? dims.h : H;
+  const layout = useMemo(() => buildLayout(memories, chapters, Wd, Hd), [memories, chapters, Wd, Hd]);
   const layoutRef = useRef(layout);
   layoutRef.current = layout;
 
@@ -474,27 +480,50 @@ export function Constellation({
   const starCount = layout.starCount;
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const fn = () => setReduced(mq.matches);
+    const mqReduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const fn = () => setReduced(mqReduced.matches);
     fn();
-    mq.addEventListener("change", fn);
-    return () => mq.removeEventListener("change", fn);
+    mqReduced.addEventListener("change", fn);
+
+    const mqCoarse = window.matchMedia("(pointer: coarse)");
+    const fnCoarse = () => setCoarse(mqCoarse.matches);
+    fnCoarse();
+    mqCoarse.addEventListener("change", fnCoarse);
+
+    return () => {
+      mqReduced.removeEventListener("change", fn);
+      mqCoarse.removeEventListener("change", fnCoarse);
+    };
   }, []);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const r = entries[0]?.contentRect;
+      if (!r || r.width < 10) return;
+      setDims({ w: r.width, h: r.width * (H / W) });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [W, H]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d")!;
+    const cw = Wd;
+    const ch = Hd;
     const dpr = typeof window !== "undefined" ? Math.min(2, window.devicePixelRatio || 1) : 1;
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
+    canvas.width = cw * dpr;
+    canvas.height = ch * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const staticLayer = buildStaticLayer(layout, W, H);
+    const staticLayer = buildStaticLayer(layout, cw, ch);
 
     const dust = Array.from({ length: 44 }, (_, i) => ({
-      x: ((hashStr(`dust-${i}`) % 1000) / 1000) * W,
-      y: ((hashStr(`dusty-${i}`) % 1000) / 1000) * H,
+      x: ((hashStr(`dust-${i}`) % 1000) / 1000) * cw,
+      y: ((hashStr(`dusty-${i}`) % 1000) / 1000) * ch,
       phase: ((hashStr(`d-${i}`) % 1000) / 1000) * Math.PI * 2,
       sp: 0.7 + ((i % 5) / 5) * 1.6,
       s: 0.5 + ((i % 3) / 3) * 0.6,
@@ -511,8 +540,8 @@ export function Constellation({
 
       // big outer halo — the light spill of a shining star
       const g = ctx.createRadialGradient(xx, yy, 0, xx, yy, R * 7);
-      g.addColorStop(0, tint(s, 0.34 * amp));
-      g.addColorStop(1, `rgba(${ROSE},0)`);
+      g.addColorStop(0, tint(s, 0.4 * amp));
+      g.addColorStop(1, `rgba(${GOLD},0)`);
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(xx, yy, R * 7, 0, Math.PI * 2);
@@ -525,9 +554,9 @@ export function Constellation({
       for (let i = 0; i < 4; i++) {
         ctx.rotate(Math.PI / 2);
         const rg = ctx.createLinearGradient(0, 0, 0, -rayLen);
-        rg.addColorStop(0, `rgba(255,255,255,${0.95 * amp})`);
-        rg.addColorStop(0.45, tint(s, 0.55 * amp));
-        rg.addColorStop(1, `rgba(${ROSE},0)`);
+        rg.addColorStop(0, `rgba(255,235,200,${0.95 * amp})`);
+        rg.addColorStop(0.45, tint(s, 0.65 * amp));
+        rg.addColorStop(1, `rgba(${GOLD},0)`);
         ctx.fillStyle = rg;
         ctx.beginPath();
         ctx.moveTo(-R * 0.7, R * 0.25);
@@ -539,9 +568,9 @@ export function Constellation({
       // diagonal gold glints (true twinkle)
       for (let i = 0; i < 4; i++) {
         const a = Math.PI / 4 + (i * Math.PI) / 2;
-        const gl = R * (1.5 + 1.1 * tw);
-        ctx.strokeStyle = `rgba(${GOLD},${0.7 * amp})`;
-        ctx.lineWidth = 1.1;
+        const gl = R * (2 + 1.4 * tw);
+        ctx.strokeStyle = `rgba(${GOLD_BRIGHT},${0.85 * amp})`;
+        ctx.lineWidth = 1.3;
         ctx.beginPath();
         ctx.moveTo(Math.cos(a) * R * 1.1, Math.sin(a) * R * 1.1);
         ctx.lineTo(Math.cos(a) * gl, Math.sin(a) * gl);
@@ -552,7 +581,7 @@ export function Constellation({
       if (s.imp === 2) {
         ctx.beginPath();
         ctx.arc(xx, yy, R * 2.6, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(${ROSE_MID},${0.4 * amp})`;
+        ctx.strokeStyle = `rgba(${GOLD_DEEP},${0.5 * amp})`;
         ctx.lineWidth = 1.1;
         ctx.stroke();
         ctx.beginPath();
@@ -580,16 +609,16 @@ export function Constellation({
         ctx.setLineDash([]);
       }
 
-      // diamond core — white-hot center with a colored body
+      // diamond core — warm white-hot center with a gold body
       ctx.save();
       ctx.translate(xx, yy);
       ctx.rotate(Math.PI / 4);
-      ctx.fillStyle = `rgba(${ROSE_SOFT},${0.9 * amp})`;
-      ctx.fillRect(-R * 0.75, -R * 0.75, R * 1.5, R * 1.5);
+      ctx.fillStyle = `rgba(${GOLD_BRIGHT},${0.95 * amp})`;
+      ctx.fillRect(-R * 0.8, -R * 0.8, R * 1.6, R * 1.6);
       ctx.restore();
       ctx.beginPath();
       ctx.arc(xx, yy, R * 0.62, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${ROSE_WHITE},1)`;
+      ctx.fillStyle = `rgba(255,243,214,1)`;
       ctx.fill();
       ctx.beginPath();
       ctx.arc(xx, yy, R * 0.3, 0, Math.PI * 2);
@@ -606,8 +635,8 @@ export function Constellation({
     }
 
     function render(now: number) {
-      ctx.clearRect(0, 0, W, H);
-      ctx.drawImage(staticLayer, 0, 0, W, H);
+      ctx.clearRect(0, 0, cw, ch);
+      ctx.drawImage(staticLayer, 0, 0, cw, ch);
 
       const layNow = layoutRef.current;
       drawOrigin(ctx, layNow.origin, now, reduced, originName || "", stamp, originCaption);
@@ -658,8 +687,8 @@ export function Constellation({
           const ang = -0.28 - Math.random() * 0.5;
           shooting.vx = Math.cos(ang) * (0.24 + Math.random() * 0.12);
           shooting.vy = Math.sin(ang) * (0.24 + Math.random() * 0.12);
-          shooting.x = W * (0.2 + Math.random() * 0.6);
-          shooting.y = H * (0.05 + Math.random() * 0.3);
+          shooting.x = cw * (0.2 + Math.random() * 0.6);
+          shooting.y = ch * (0.05 + Math.random() * 0.3);
           shooting.u = Math.random();
         }
       }
@@ -676,7 +705,7 @@ export function Constellation({
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [layout, reduced, W, H, stamp, originName, originCaption]);
+  }, [layout, reduced, Wd, Hd, stamp, originName, originCaption]);
 
   useLayoutEffect(() => {
     function update() {
@@ -687,12 +716,12 @@ export function Constellation({
         setPos(null);
         return;
       }
-      setPos({ sx: (s.x / W) * rect.width, sy: (s.y / H) * rect.height, w: rect.width, h: rect.height });
+      setPos({ sx: (s.x / Wd) * rect.width, sy: (s.y / Hd) * rect.height, w: rect.width, h: rect.height });
     }
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  }, [selectedId, hoverId, W, H]);
+  }, [selectedId, hoverId, Wd, Hd]);
 
   function hitTest(mx: number, my: number, pad: number): string | null {
     let best: { id: string; d: number } | null = null;
@@ -706,7 +735,7 @@ export function Constellation({
   function toLocal(e: React.MouseEvent<HTMLCanvasElement>) {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return { mx: 0, my: 0 };
-    return { mx: (e.clientX - rect.left) * (W / rect.width), my: (e.clientY - rect.top) * (H / rect.height) };
+    return { mx: (e.clientX - rect.left) * (Wd / rect.width), my: (e.clientY - rect.top) * (Hd / rect.height) };
   }
 
   function handlePointerMove(e: React.MouseEvent<HTMLCanvasElement>) {
@@ -718,7 +747,7 @@ export function Constellation({
 
   function handleClick(e: React.MouseEvent<HTMLCanvasElement>) {
     const pointer = (e.nativeEvent as PointerEvent).pointerType;
-    const pad = pointer === "touch" ? 28 : 16;
+    const pad = pointer === "touch" ? 34 : 16;
     const { mx, my } = toLocal(e);
     const id = hitTest(mx, my, pad);
     if (!id) {
@@ -794,41 +823,54 @@ export function Constellation({
         <div
           role="dialog"
           aria-label={`Memory preview: ${targetStar.title}`}
-          className="absolute z-10 w-[min(17rem,calc(100%-16px))] rounded-xl border border-[#e44297]/35 bg-[#fff8fe]/95 p-3 shadow-[0_20px_44px_-14px_rgba(46,11,51,0.35)] backdrop-blur-md"
-          style={{
-            left: pos.sx + (flipX ? -12 : 12),
-            top: pos.sy + (flipY ? -12 : 12),
-            transform: `translate(${flipX ? "-100%" : 0}, ${flipY ? "-100%" : 0})`,
-          }}
+          className={cn(
+            "border border-[#e44297]/35 bg-[#fff8fe]/95 backdrop-blur-md",
+            coarse
+              ? "fixed inset-x-0 bottom-3 z-30 mx-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl p-4 shadow-[0_-12px_42px_-18px_rgba(46,11,51,0.45)]"
+              : "absolute z-10 w-[min(17rem,calc(100%-16px))] rounded-xl p-3 shadow-[0_20px_44px_-14px_rgba(46,11,51,0.35)]"
+          )}
+          style={
+            coarse
+              ? undefined
+              : {
+                  left: pos.sx + (flipX ? -12 : 12),
+                  top: pos.sy + (flipY ? -12 : 12),
+                  transform: `translate(${flipX ? "-100%" : 0}, ${flipY ? "-100%" : 0})`,
+                }
+          }
         >
           <div className="flex items-center justify-between gap-3">
-            <span className="truncate font-mono text-[9px] uppercase tracking-[0.15em] text-champagne/90">
+            <span className="truncate font-mono text-[10px] uppercase tracking-[0.15em] text-champagne/90">
               {importanti(targetStar.kind)}
               {targetStar.status && targetStar.status !== "verified" ? " · in progress" : ""}
             </span>
-            {selectedId === targetStar.id ? (
+            {coarse || selectedId === targetStar.id ? (
               <button
                 onClick={() => setSelectedId(null)}
                 aria-label="Close preview"
-                className="shrink-0 rounded-full px-1 text-[11px] leading-none text-[#8a5c8f] transition-colors hover:text-[#2e0b33]"
+                className="shrink-0 rounded-full bg-[#f6e7f3] px-2 py-0.5 text-[11px] leading-none text-[#8a5c8f] transition-colors hover:text-[#2e0b33]"
               >
                 ✕
               </button>
             ) : null}
           </div>
-          <p className="mt-1 font-display text-sm leading-snug text-[#2e0b33]">{targetStar.title}</p>
-          <p className="mt-1 font-mono text-[10px] text-[#8a5c8f]">
+          <p className={cn("mt-1.5 font-display leading-snug text-[#2e0b33]", coarse ? "text-base" : "text-[15px]")}>
+            {targetStar.title}
+          </p>
+          <p className="mt-1 font-mono text-[11px] text-[#8a5c8f]">
             {fmtDay(targetStar.date)}
             {targetStar.locationName ? <span className="text-[#a24a7f]"> · {targetStar.locationName}</span> : null}
           </p>
-          {selectedId === targetStar.id ? (
+          {coarse || selectedId === targetStar.id ? (
             <>
               {targetStar.description ? (
-                <p className="mt-2 line-clamp-3 text-[11px] leading-relaxed text-[#6b4a72]">{targetStar.description}</p>
+                <p className={cn("mt-2 leading-relaxed text-[#6b4a72]", coarse ? "text-[13px] line-clamp-4" : "line-clamp-3 text-[11px]")}>
+                  {targetStar.description}
+                </p>
               ) : null}
               <Link
                 href={`/memories/${targetStar.id}`}
-                className="mt-3 inline-flex h-8 items-center rounded-full bg-[#5a0b62] px-4 text-[11px] font-medium text-white transition-colors hover:bg-[#6d1a76]"
+                className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-full bg-[#5a0b62] px-4 text-xs font-medium text-white transition-colors hover:bg-[#6d1a76] sm:w-auto sm:text-[11px] sm:h-8"
               >
                 Open memory →
               </Link>
