@@ -820,89 +820,49 @@ export function Constellation({
         </p>
       ) : null}
 
-      {targetStar && pos && coarse ? (
-        <>
-          <div className="fixed inset-0 z-20 bg-black/15 backdrop-blur-[1px]" onClick={() => setSelectedId(null)} />
-          <div
-            role="dialog"
-            aria-label={`Memory preview: ${targetStar.title}`}
-            className="fixed left-1/2 top-1/2 z-30 w-[calc(100%-2rem)] max-w-[22rem] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[#e44297]/30 bg-white/95 p-4 shadow-[0_20px_50px_-14px_rgba(46,11,51,0.4)] backdrop-blur-md"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <span className="truncate font-mono text-[10px] uppercase tracking-[0.15em] text-champagne/90">
-                {importanti(targetStar.kind)}
-                {targetStar.status && targetStar.status !== "verified" ? " · in progress" : ""}
-              </span>
-              <button
-                onClick={() => setSelectedId(null)}
-                aria-label="Close preview"
-                className="shrink-0 rounded-full bg-[#f6e7f3] px-2 py-0.5 text-[11px] leading-none text-[#8a5c8f] transition-colors hover:text-[#2e0b33]"
-              >
-                ✕
-              </button>
-            </div>
-            <p className="mt-2 text-base font-semibold leading-snug text-[#2e0b33]">{targetStar.title}</p>
-            <p className="mt-1 font-mono text-[11px] text-[#8a5c8f]">
-              {fmtDay(targetStar.date)}
-              {targetStar.locationName ? <span className="text-[#a24a7f]"> · {targetStar.locationName}</span> : null}
-            </p>
-            {targetStar.description ? (
-              <p className="mt-2 text-[13px] leading-relaxed text-[#6b4a72] line-clamp-3">{targetStar.description}</p>
-            ) : null}
-            <button
-              onClick={() => router.push(`/memories/${targetStar.id}`)}
-              className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full bg-[#5a0b62] px-4 text-[13px] font-medium text-white transition-colors hover:bg-[#6d1a76]"
-            >
-              Open memory →
-            </button>
-          </div>
-        </>
-      ) : null}
-      {targetStar && pos && !coarse ? (
+      {targetStar && pos ? (
         <div
           role="dialog"
           aria-label={`Memory preview: ${targetStar.title}`}
-          className="absolute z-10 w-[min(17rem,calc(100%-16px))] rounded-xl border border-[#e44297]/35 bg-[#fff8fe]/95 p-3 shadow-[0_20px_44px_-14px_rgba(46,11,51,0.35)] backdrop-blur-md"
+          className="absolute z-10 w-[min(15rem,calc(100%-12px))] rounded-xl border border-[#e44297]/35 bg-[#fff8fe]/95 p-3 shadow-[0_20px_44px_-14px_rgba(46,11,51,0.35)] backdrop-blur-md"
           style={{
-            left: pos.sx + (flipX ? -12 : 12),
-            top: pos.sy + (flipY ? -12 : 12),
+            left: Math.max(4, Math.min(pos.w - 160, pos.sx + (flipX ? -12 : 12))),
+            top: Math.max(4, Math.min(pos.h - 120, pos.sy + (flipY ? -12 : 12))),
             transform: `translate(${flipX ? "-100%" : 0}, ${flipY ? "-100%" : 0})`,
           }}
         >
-          <div className="flex items-center justify-between gap-3">
-            <span className="truncate font-mono text-[10px] uppercase tracking-[0.15em] text-champagne/90">
+          <div className="flex items-center justify-between gap-2">
+            <span className="truncate font-mono text-[9px] uppercase tracking-[0.15em] text-champagne/90">
               {importanti(targetStar.kind)}
               {targetStar.status && targetStar.status !== "verified" ? " · in progress" : ""}
             </span>
-            {selectedId === targetStar.id ? (
-              <button
-                onClick={() => setSelectedId(null)}
-                aria-label="Close preview"
-                className="shrink-0 rounded-full bg-[#f6e7f3] px-2 py-0.5 text-[11px] leading-none text-[#8a5c8f] transition-colors hover:text-[#2e0b33]"
-              >
-                ✕
-              </button>
-            ) : null}
+            <button
+              onClick={() => setSelectedId(null)}
+              aria-label="Close preview"
+              className="shrink-0 rounded-full bg-[#f6e7f3] px-1.5 py-0.5 text-[10px] leading-none text-[#8a5c8f] transition-colors hover:text-[#2e0b33]"
+            >
+              ✕
+            </button>
           </div>
-          <p className="mt-1.5 text-[15px] font-display leading-snug text-[#2e0b33]">{targetStar.title}</p>
-          <p className="mt-1 font-mono text-[11px] text-[#8a5c8f]">
+          <p className="mt-1 font-display text-[13px] leading-snug text-[#2e0b33]">{targetStar.title}</p>
+          <p className="mt-0.5 font-mono text-[9px] text-[#8a5c8f]">
             {fmtDay(targetStar.date)}
             {targetStar.locationName ? <span className="text-[#a24a7f]"> · {targetStar.locationName}</span> : null}
           </p>
           {selectedId === targetStar.id ? (
             <>
               {targetStar.description ? (
-                <p className="mt-2 line-clamp-3 text-[11px] leading-relaxed text-[#6b4a72]">{targetStar.description}</p>
+                <p className="mt-1.5 line-clamp-2 text-[10px] leading-relaxed text-[#6b4a72]">{targetStar.description}</p>
               ) : null}
               <Link
                 href={`/memories/${targetStar.id}`}
-                className="mt-3 inline-flex h-8 items-center rounded-full bg-[#5a0b62] px-4 text-[11px] font-medium text-white transition-colors hover:bg-[#6d1a76]"
+                className="mt-2 inline-flex h-7 items-center rounded-full bg-[#5a0b62] px-3 text-[10px] font-medium text-white transition-colors hover:bg-[#6d1a76]"
               >
                 Open memory →
               </Link>
             </>
           ) : (
-            <p className="mt-1.5 text-[10px] text-[#8a5c8f]">Tap or click to open the full memory</p>
+            <p className="mt-1 text-[9px] text-[#8a5c8f]">Tap again to open</p>
           )}
         </div>
       ) : null}
