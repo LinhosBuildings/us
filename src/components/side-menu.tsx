@@ -68,7 +68,7 @@ export function SideMenuProvider({ sections, children }: { sections: SideMenuSec
         aria-label="Sections"
         aria-hidden={!open}
         className={cn(
-          "fixed inset-y-0 left-0 z-[60] flex w-[86%] max-w-sm transform flex-col border-r border-line-strong bg-white/90 backdrop-blur-2xl transition-transform duration-300 ease-out",
+          "fixed inset-y-0 left-0 z-[60] flex w-[74%] max-w-[17rem] transform flex-col border-r border-line-strong bg-white/90 backdrop-blur-2xl transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "pointer-events-none -translate-x-full"
         )}
       >

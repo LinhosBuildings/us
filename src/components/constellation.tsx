@@ -202,7 +202,7 @@ function buildLayout(memories: StarMemory[], chapters: Chapter[], W: number, H: 
         status: m.status ?? null,
         x: m.constellationX! * W,
         y: m.constellationY! * H,
-        r: (imp === 2 ? 7 : imp === 1 ? 5 : 3.4) * (0.9 + ((h % 100) / 100) * 0.35),
+        r: (imp === 2 ? 9 : imp === 1 ? 6.4 : 4.4) * (0.9 + ((h % 100) / 100) * 0.35),
         imp,
         family: familyOf(m.mood),
         lum: luminanceOf(m.mood),
@@ -713,12 +713,12 @@ export function Constellation({
     const pointer = (e.nativeEvent as PointerEvent).pointerType;
     if (pointer && pointer !== "mouse") return;
     const { mx, my } = toLocal(e);
-    setHoverId(hitTest(mx, my, 9));
+    setHoverId(hitTest(mx, my, 16));
   }
 
   function handleClick(e: React.MouseEvent<HTMLCanvasElement>) {
     const pointer = (e.nativeEvent as PointerEvent).pointerType;
-    const pad = pointer === "touch" ? 16 : 9;
+    const pad = pointer === "touch" ? 28 : 16;
     const { mx, my } = toLocal(e);
     const id = hitTest(mx, my, pad);
     if (!id) {

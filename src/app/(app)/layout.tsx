@@ -5,6 +5,7 @@ import { getStore } from "@/lib/data/contracts";
 import { computeCounter } from "@/lib/relationship-counter";
 import { Avatar } from "@/components/ui";
 import { SideMenuProvider, SideMenuTrigger, type SideMenuSection } from "@/components/side-menu";
+import { PageShell } from "@/components/page-shell";
 
 const SECTIONS: SideMenuSection[] = [
   { href: "/home", label: "Our Orbit", hint: "the whole of us", icon: "✦" },
@@ -137,7 +138,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* main content */}
-        <main className="flex-1 px-4 py-6 md:mx-auto md:w-full md:max-w-6xl md:px-6 md:py-10">{children}</main>
+        <main className="flex-1 px-4 py-6 md:mx-auto md:w-full md:max-w-6xl md:px-6 md:py-10">
+          <PageShell>{children}</PageShell>
+        </main>
       </SideMenuProvider>
     </div>
   );
