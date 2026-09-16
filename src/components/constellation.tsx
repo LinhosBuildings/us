@@ -159,6 +159,7 @@ interface Layout {
   path: Segment[];
   clusters: Cluster[];
   starCount: number;
+  compact: boolean;
 }
 
 function fmtDay(iso: string): string {
@@ -276,7 +277,7 @@ function buildLayout(memories: StarMemory[], chapters: Chapter[], W: number, H: 
   const byId = new Map<string, Star>();
   for (const s of stars) byId.set(s.id, s);
 
-  return { stars, byId, origin, path, clusters, starCount: stars.length };
+  return { stars, byId, origin, path, clusters, starCount: stars.length, compact: W < 640 };
 }
 
 function buildStaticLayer(layout: Layout, W: number, H: number): HTMLCanvasElement {
@@ -285,6 +286,7 @@ function buildStaticLayer(layout: Layout, W: number, H: number): HTMLCanvasEleme
   c.height = H;
   const ctx = c.getContext("2d")!;
   const { origin, path, clusters } = layout;
+  const compact = layout.compact;
 // soft rose wash under everything
   const wash = (x: number, y: number, r: number, a: number) => {
     const g = ctx.createRadialGradient(x, y, 0, x, y, r);
@@ -298,33 +300,35 @@ function buildStaticLayer(layout: Layout, W: number, H: number): HTMLCanvasEleme
   wash(origin.x, origin.y, W * 0.3, 0.08);
   for (const cl of clusters) wash(cl.cx, cl.cy, cl.radius * 2.1, 0.05);
 
-  // chapter constellations — soft glow, its ring, and its code
-  for (const cl of clusters) {
-    const g = ctx.createRadialGradient(cl.cx, cl.cy, 0, cl.cx, cl.cy, cl.radius * 1.7);
-    g.addColorStop(0, `rgba(${ROSE},0.09)`);
-    g.addColorStop(1, `rgba(${ROSE},0)`);
+  // chapter constellations — soft glow, its ring, and its code (hidden on compact/mobile)
+  if (!compact) {
+    for (const cl of clusters) {
+      const g = ctx.createRadialGradient(cl.cx, cl.cy, 0, cl.cx, cl.cy, cl.radius * 1.7);
+      g.addColorStop(0, `rgba(${ROSE},0.09)`);
+      g.addColorStop(1, `rgba(${ROSE},0)`);
 
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(cl.cx, cl.cy, cl.radius * 1.7, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(cl.cx, cl.cy, cl.radius * 1.7, 0, Math.PI * 2);
+      ctx.fill();
 
-    ctx.beginPath();
-    ctx.arc(cl.cx, cl.cy, cl.radius, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(${ROSE_MID},0.34)`;
-    ctx.lineWidth = 1.1;
-    ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cl.cx, cl.cy, cl.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(${ROSE_MID},0.34)`;
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(cl.cx, cl.cy, cl.radius * 1.22, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(${GOLD},0.2)`;
-    ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cl.cx, cl.cy, cl.radius * 1.22, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(${GOLD},0.2)`;
+      ctx.stroke();
 
-    ctx.font = '700 12px ui-monospace, SFMono-Regular, Menlo, monospace';
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = `rgba(${PLUM_SOFT},0.95)`;
-    ctx.fillText(cl.chapter.code.toUpperCase(), cl.cx, cl.cy + cl.radius + 19);
+      ctx.font = '700 12px ui-monospace, SFMono-Regular, Menlo, monospace';
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = `rgba(${PLUM_SOFT},0.95)`;
+      ctx.fillText(cl.chapter.code.toUpperCase(), cl.cx, cl.cy + cl.radius + 19);
+    }
   }
 
   // the journey — organic rose threads from the origin through the memories
@@ -360,7 +364,8 @@ function drawOrigin(
   reduced: boolean,
   name: string,
   stamp: string,
-  caption?: string
+  caption?: string,
+  showText = true
 ) {
   const pulse = reduced ? 0.5 : (Math.sin(now / 1000) + 1) / 2;
 
@@ -425,17 +430,17 @@ function drawOrigin(
 
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  if (name) {
+  if (showText && name) {
     ctx.font = '700 14px "Nunito Sans", system-ui, sans-serif';
     ctx.fillStyle = `rgba(${PLUM},0.95)`;
     ctx.fillText(name, origin.x + 20, origin.y - 17);
   }
-  if (stamp) {
+  if (showText && stamp) {
     ctx.font = '700 11px ui-monospace, SFMono-Regular, Menlo, monospace';
     ctx.fillStyle = `rgba(${PLUM_SOFT},0.95)`;
     ctx.fillText(stamp.toUpperCase(), origin.x + 20, origin.y - 1);
   }
-  if (caption) {
+  if (showText && caption) {
     ctx.font = 'italic 700 13px "Nunito Sans", system-ui, sans-serif';
     ctx.fillStyle = `rgba(${ROSE},0.95)`;
     ctx.fillText(caption, origin.x + 20, origin.y + 17);
@@ -640,7 +645,7 @@ export function Constellation({
       ctx.drawImage(staticLayer, 0, 0, cw, ch);
 
       const layNow = layoutRef.current;
-      drawOrigin(ctx, layNow.origin, now, reduced, originName || "", stamp, originCaption);
+      drawOrigin(ctx, layNow.origin, now, reduced, originName || "", stamp, originCaption, !layNow.compact);
 
       const note = new Set<string>();
       if (hoverRef.current) note.add(hoverRef.current);
