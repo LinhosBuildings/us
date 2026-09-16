@@ -178,6 +178,7 @@ function importanti(kind: StarMemory["kind"]): string {
 }
 
 function buildLayout(memories: StarMemory[], chapters: Chapter[], W: number, H: number): Layout {
+  const densityScale = Math.min(1, W / 700);
   const stars: Star[] = memories
     .filter(
       (m) =>
@@ -204,7 +205,7 @@ function buildLayout(memories: StarMemory[], chapters: Chapter[], W: number, H: 
         status: m.status ?? null,
         x: m.constellationX! * W,
         y: m.constellationY! * H,
-        r: (imp === 2 ? 11 : imp === 1 ? 8 : 5.6) * (0.9 + ((h % 100) / 100) * 0.35),
+        r: (imp === 2 ? 11 : imp === 1 ? 8 : 5.6) * densityScale * (0.9 + ((h % 100) / 100) * 0.35),
         imp,
         family: familyOf(m.mood),
         lum: luminanceOf(m.mood),
@@ -230,7 +231,7 @@ function buildLayout(memories: StarMemory[], chapters: Chapter[], W: number, H: 
     const len = Math.hypot(dx, dy) || 1;
     const nx = -dy / len;
     const ny = dx / len;
-    const sag = Math.min(len * 0.18, 44) * (i % 2 === 0 ? 1 : -1) * 0.7 + 12;
+    const sag = Math.min(len * 0.18, 44 * densityScale) * (i % 2 === 0 ? 1 : -1) * 0.7 + 12 * densityScale;
     path.push({
       x1: a.x,
       y1: a.y,
@@ -264,11 +265,11 @@ function buildLayout(memories: StarMemory[], chapters: Chapter[], W: number, H: 
     }
     cx /= list.length;
     cy /= list.length;
-    let radius = list.length === 1 ? 26 : 34;
+    let radius = list.length === 1 ? 26 * densityScale : 34 * densityScale;
     for (const s of list) {
-      radius = Math.max(radius, Math.hypot(s.x - cx, s.y - cy) + s.r + 12);
+      radius = Math.max(radius, Math.hypot(s.x - cx, s.y - cy) + s.r + 12 * densityScale);
     }
-    clusters.push({ chapter, stars: list, cx, cy, radius: Math.min(radius, 96) });
+    clusters.push({ chapter, stars: list, cx, cy, radius: Math.min(radius, 96 * densityScale) });
   }
   clusters.sort((a, b) => a.chapter.order - b.chapter.order);
 
@@ -819,32 +820,61 @@ export function Constellation({
         </p>
       ) : null}
 
-      {targetStar && pos ? (
+      {targetStar && pos && coarse ? (
+        <>
+          <div className="fixed inset-0 z-20 bg-black/15 backdrop-blur-[1px]" onClick={() => setSelectedId(null)} />
+          <div
+            role="dialog"
+            aria-label={`Memory preview: ${targetStar.title}`}
+            className="fixed left-1/2 top-1/2 z-30 w-[calc(100%-2rem)] max-w-[22rem] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[#e44297]/30 bg-white/95 p-4 shadow-[0_20px_50px_-14px_rgba(46,11,51,0.4)] backdrop-blur-md"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <span className="truncate font-mono text-[10px] uppercase tracking-[0.15em] text-champagne/90">
+                {importanti(targetStar.kind)}
+                {targetStar.status && targetStar.status !== "verified" ? " · in progress" : ""}
+              </span>
+              <button
+                onClick={() => setSelectedId(null)}
+                aria-label="Close preview"
+                className="shrink-0 rounded-full bg-[#f6e7f3] px-2 py-0.5 text-[11px] leading-none text-[#8a5c8f] transition-colors hover:text-[#2e0b33]"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="mt-2 text-base font-semibold leading-snug text-[#2e0b33]">{targetStar.title}</p>
+            <p className="mt-1 font-mono text-[11px] text-[#8a5c8f]">
+              {fmtDay(targetStar.date)}
+              {targetStar.locationName ? <span className="text-[#a24a7f]"> · {targetStar.locationName}</span> : null}
+            </p>
+            {targetStar.description ? (
+              <p className="mt-2 text-[13px] leading-relaxed text-[#6b4a72] line-clamp-3">{targetStar.description}</p>
+            ) : null}
+            <button
+              onClick={() => router.push(`/memories/${targetStar.id}`)}
+              className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full bg-[#5a0b62] px-4 text-[13px] font-medium text-white transition-colors hover:bg-[#6d1a76]"
+            >
+              Open memory →
+            </button>
+          </div>
+        </>
+      ) : null}
+      {targetStar && pos && !coarse ? (
         <div
           role="dialog"
           aria-label={`Memory preview: ${targetStar.title}`}
-          className={cn(
-            "border border-[#e44297]/35 bg-[#fff8fe]/95 backdrop-blur-md",
-            coarse
-              ? "fixed inset-x-0 bottom-3 z-30 mx-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl p-4 shadow-[0_-12px_42px_-18px_rgba(46,11,51,0.45)]"
-              : "absolute z-10 w-[min(17rem,calc(100%-16px))] rounded-xl p-3 shadow-[0_20px_44px_-14px_rgba(46,11,51,0.35)]"
-          )}
-          style={
-            coarse
-              ? undefined
-              : {
-                  left: pos.sx + (flipX ? -12 : 12),
-                  top: pos.sy + (flipY ? -12 : 12),
-                  transform: `translate(${flipX ? "-100%" : 0}, ${flipY ? "-100%" : 0})`,
-                }
-          }
+          className="absolute z-10 w-[min(17rem,calc(100%-16px))] rounded-xl border border-[#e44297]/35 bg-[#fff8fe]/95 p-3 shadow-[0_20px_44px_-14px_rgba(46,11,51,0.35)] backdrop-blur-md"
+          style={{
+            left: pos.sx + (flipX ? -12 : 12),
+            top: pos.sy + (flipY ? -12 : 12),
+            transform: `translate(${flipX ? "-100%" : 0}, ${flipY ? "-100%" : 0})`,
+          }}
         >
           <div className="flex items-center justify-between gap-3">
             <span className="truncate font-mono text-[10px] uppercase tracking-[0.15em] text-champagne/90">
               {importanti(targetStar.kind)}
               {targetStar.status && targetStar.status !== "verified" ? " · in progress" : ""}
             </span>
-            {coarse || selectedId === targetStar.id ? (
+            {selectedId === targetStar.id ? (
               <button
                 onClick={() => setSelectedId(null)}
                 aria-label="Close preview"
@@ -854,23 +884,19 @@ export function Constellation({
               </button>
             ) : null}
           </div>
-          <p className={cn("mt-1.5 font-display leading-snug text-[#2e0b33]", coarse ? "text-base" : "text-[15px]")}>
-            {targetStar.title}
-          </p>
+          <p className="mt-1.5 text-[15px] font-display leading-snug text-[#2e0b33]">{targetStar.title}</p>
           <p className="mt-1 font-mono text-[11px] text-[#8a5c8f]">
             {fmtDay(targetStar.date)}
             {targetStar.locationName ? <span className="text-[#a24a7f]"> · {targetStar.locationName}</span> : null}
           </p>
-          {coarse || selectedId === targetStar.id ? (
+          {selectedId === targetStar.id ? (
             <>
               {targetStar.description ? (
-                <p className={cn("mt-2 leading-relaxed text-[#6b4a72]", coarse ? "text-[13px] line-clamp-4" : "line-clamp-3 text-[11px]")}>
-                  {targetStar.description}
-                </p>
+                <p className="mt-2 line-clamp-3 text-[11px] leading-relaxed text-[#6b4a72]">{targetStar.description}</p>
               ) : null}
               <Link
                 href={`/memories/${targetStar.id}`}
-                className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-full bg-[#5a0b62] px-4 text-xs font-medium text-white transition-colors hover:bg-[#6d1a76] sm:w-auto sm:text-[11px] sm:h-8"
+                className="mt-3 inline-flex h-8 items-center rounded-full bg-[#5a0b62] px-4 text-[11px] font-medium text-white transition-colors hover:bg-[#6d1a76]"
               >
                 Open memory →
               </Link>
