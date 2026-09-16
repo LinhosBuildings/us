@@ -180,6 +180,7 @@ function importanti(kind: StarMemory["kind"]): string {
 
 function buildLayout(memories: StarMemory[], chapters: Chapter[], W: number, H: number): Layout {
   const densityScale = Math.min(1, W / 700);
+  const compact = W < 640;
   const stars: Star[] = memories
     .filter(
       (m) =>
@@ -219,6 +220,38 @@ function buildLayout(memories: StarMemory[], chapters: Chapter[], W: number, H: 
       const d = new Date(a.date).getTime() - new Date(b.date).getTime();
       return isNaN(d) ? a.index - b.index : d || a.index - b.index;
     });
+
+  // on compact screens, push crowded stars apart so they sit in a clean spread
+  if (compact) {
+    const minSep = Math.max(30, Math.min(46, W * 0.1));
+    for (let iter = 0; iter < 20; iter++) {
+      let moved = false;
+      for (let i = 0; i < stars.length; i++) {
+        const a = stars[i];
+        for (let j = i + 1; j < stars.length; j++) {
+          const b = stars[j];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const d = Math.hypot(dx, dy);
+          if (d > 0 && d < minSep) {
+            const push = (minSep - d) / 2 / d;
+            const ox = dx * push;
+            const oy = dy * push;
+            a.x -= ox;
+            a.y -= oy;
+            b.x += ox;
+            b.y += oy;
+            moved = true;
+          }
+        }
+      }
+      for (const s of stars) {
+        s.x = Math.max(0.04 * W, Math.min(0.96 * W, s.x));
+        s.y = Math.max(0.05 * H, Math.min(0.95 * H, s.y));
+      }
+      if (!moved) break;
+    }
+  }
 
   const origin = { x: W * ORIGIN_POS.x, y: H * ORIGIN_POS.y };
 
@@ -277,7 +310,7 @@ function buildLayout(memories: StarMemory[], chapters: Chapter[], W: number, H: 
   const byId = new Map<string, Star>();
   for (const s of stars) byId.set(s.id, s);
 
-  return { stars, byId, origin, path, clusters, starCount: stars.length, compact: W < 640 };
+  return { stars, byId, origin, path, clusters, starCount: stars.length, compact };
 }
 
 function buildStaticLayer(layout: Layout, W: number, H: number): HTMLCanvasElement {
@@ -794,8 +827,15 @@ export function Constellation({
 
   const target = selectedId ?? hoverId;
   const targetStar = target ? layout.byId.get(target) ?? null : null;
-  const flipX = pos ? pos.sx > pos.w * 0.58 : false;
-  const flipY = pos ? pos.sy > pos.h * 0.6 : false;
+
+  const cardW = Math.min(240, pos ? pos.w - 12 : 240);
+  const cardH = 158;
+  const cardLeft = pos
+    ? Math.max(4, Math.min(pos.w - cardW - 4, pos.sx + (pos.sx > pos.w * 0.5 ? -12 - cardW : 12)))
+    : 4;
+  const cardTop = pos
+    ? Math.max(4, Math.min(pos.h - cardH - 4, pos.sy + (pos.sy > pos.h * 0.6 ? -12 - cardH : 12)))
+    : 4;
 
   return (
     <div ref={wrapRef} className={cn("relative", className)}>
@@ -831,9 +871,8 @@ export function Constellation({
           aria-label={`Memory preview: ${targetStar.title}`}
           className="absolute z-10 w-[min(15rem,calc(100%-12px))] rounded-xl border border-[#e44297]/35 bg-[#fff8fe]/95 p-3 shadow-[0_20px_44px_-14px_rgba(46,11,51,0.35)] backdrop-blur-md"
           style={{
-            left: Math.max(4, Math.min(pos.w - 160, pos.sx + (flipX ? -12 : 12))),
-            top: Math.max(4, Math.min(pos.h - 120, pos.sy + (flipY ? -12 : 12))),
-            transform: `translate(${flipX ? "-100%" : 0}, ${flipY ? "-100%" : 0})`,
+            left: cardLeft,
+            top: cardTop,
           }}
         >
           <div className="flex items-center justify-between gap-2">
