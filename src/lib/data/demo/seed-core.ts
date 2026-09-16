@@ -91,7 +91,7 @@ export const seedChapters: Chapter[] = [
     title: "The First Dates",
     epigraph: "The beach, and the quiet that followed.",
     intro:
-      "Our first date was in September 2024, at Aberdeen Beach, Lagos. No kiss — but Biggy fell asleep on Linho's lap, and somehow that was better. The exact day, and the details of the second date, are still being confirmed. This chapter is partly finished, and that's okay.",
+      "Our first date was in September 2024, at Aberdeen Beach, Freetown. No kiss — but Biggy fell asleep on Linho's lap, and somehow that was better. The exact day, and the details of the second date, are still being confirmed. This chapter is partly finished, and that's okay.",
   },
   {
     id: "ch5",

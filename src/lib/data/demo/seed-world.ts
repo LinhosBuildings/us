@@ -68,7 +68,7 @@ export const seedFirsts: FirstRecord[] = [
     title: "Our first date",
     date: "2024-09-15T00:00:00.000Z",
     description:
-      "September 2024, at Aberdeen Beach, Lagos. No kiss that day — but Biggy fell asleep on Linho's lap.",
+      "September 2024, at Aberdeen Beach, Freetown. No kiss that day — but Biggy fell asleep on Linho's lap.",
     custom: false,
     createdAt: "2025-01-01T00:00:00.000Z",
     createdBy: LINHO,
@@ -139,7 +139,7 @@ export const seedPlaces: Place[] = [
     longitude: 3.6137,
     date: "2024-09-15T00:00:00.000Z",
     story:
-      "September 2024 — the first date, at Aberdeen Beach, Lagos. Biggy slept on Linho's lap; neither of us has been the same since. Exact day and exact spot along the beach — still to be confirmed.",
+      "September 2024 — the first date, at Aberdeen Beach, Freetown. Biggy slept on Linho's lap; neither of us has been the same since. Exact day and exact spot along the beach — still to be confirmed.",
     memoryIds: ["mem03"],
     createdAt: "2025-01-01T00:00:00.000Z",
   },

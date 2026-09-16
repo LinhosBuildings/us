@@ -59,8 +59,8 @@ export const seedMemories: Memory[] = [
     kind: "place",
     date: "2024-09-15T00:00:00.000Z",
     description:
-      "Our first date was in September 2024, at Aberdeen Beach, Lagos. There was no kiss that day — but Biggy fell asleep on Linho's lap, and neither of us has ever quite gotten over it. The exact day is still to be confirmed.",
-    locationName: "Aberdeen Beach, Lagos",
+      "Our first date was in September 2024, at Aberdeen Beach, Freetown. There was no kiss that day — but Biggy fell asleep on Linho's lap, and neither of us has ever quite gotten over it. The exact day is still to be confirmed.",
+    locationName: "Aberdeen Beach, Freetown",
     mood: "tenderness",
     people: ["Linho", "Biggy"],
     media: [],

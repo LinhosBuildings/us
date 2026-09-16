@@ -20,7 +20,7 @@ export function computeCounter(startDate: string, now: Date | number = new Date(
   const nowDate = now instanceof Date ? now : new Date(now);
 
   // Timezone-safe: everything below uses UTC so the server and any client
-  // (Lagos, UTC+1, etc.) render the exact same numbers for the same instant.
+  // (Freetown, UTC+0, etc.) render the exact same numbers for the same instant.
   // The startDate is stored as ISO with a Z suffix.
   const totalDays = Math.max(0, Math.floor((nowDate.getTime() - start.getTime()) / 86_400_000));
 
