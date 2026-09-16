@@ -4,7 +4,7 @@ import { getStore } from "@/lib/data/contracts";
 import { computeCounter } from "@/lib/relationship-counter";
 import { RelationshipCounter } from "@/components/relationship-counter";
 import { Lovefield } from "@/components/lovefield";
-import { LoveDuo } from "@/components/love-duo";
+import { BearCoupleHug } from "@/components/bear-couple-hug";
 import { Constellation } from "@/components/constellation";
 import { SectionLabel, EmptyState } from "@/components/ui";
 
@@ -74,7 +74,7 @@ export default async function HomePage() {
         </h1>
         {rel.description ? <p className="mx-auto mt-4 max-w-md text-base text-fog">{rel.description}</p> : null}
 
-        <LoveDuo mode="kiss" className="mt-7" />
+        <BearCoupleHug />
 
         <div className="love-glow mt-7 rounded-2xl border border-champagne/25 bg-white/70 px-6 py-5 backdrop-blur">
           <RelationshipCounter startDate={rel.startDate} initial={counter} />

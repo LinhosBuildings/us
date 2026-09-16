@@ -444,7 +444,55 @@ body {
 .animate-page-d { animation: page-d 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .animate-page-e { animation: page-e 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-/* ─────────────────── Reduced motion ───────────────────────── */
+/* ── Bear couple hug (transparent, blends into app bg) ─────── */
+.bear-couple-stage {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 360 / 320;
+  margin: 0 auto;
+  background: transparent;
+}
+
+.bear-left {
+  transform-box: fill-box;
+  transform-origin: 70% 60%;
+  animation: leanRight 4.5s ease-in-out infinite;
+}
+
+.bear-right {
+  transform-box: fill-box;
+  transform-origin: 30% 60%;
+  animation: leanLeft 4.5s ease-in-out infinite;
+}
+
+@keyframes leanRight {
+  0%, 20% { transform: rotate(0deg) translateX(0); }
+  45%, 65% { transform: rotate(4deg) translateX(10px); }
+  90%, 100% { transform: rotate(0deg) translateX(0); }
+}
+
+@keyframes leanLeft {
+  0%, 20% { transform: rotate(0deg) translateX(0); }
+  45%, 65% { transform: rotate(-4deg) translateX(-10px); }
+  90%, 100% { transform: rotate(0deg) translateX(0); }
+}
+
+.heart {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: popHeart 4.5s ease-in-out infinite;
+}
+
+@keyframes popHeart {
+  0%, 40% { opacity: 0; transform: scale(0) translateY(0); }
+  55% { opacity: 1; transform: scale(1.15) translateY(-8px); }
+  70% { opacity: 1; transform: scale(1) translateY(-16px); }
+  90%, 100% { opacity: 0; transform: scale(0.7) translateY(-26px); }
+}
+
+/* ───────────── Reduced motion ───────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
   html {
