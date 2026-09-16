@@ -24,8 +24,8 @@ export default async function MemoriesListPage() {
     <div className="space-y-8 pb-24 md:pb-0">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <SectionLabel>Memories</SectionLabel>
-          <h1 className="font-display text-3xl font-medium text-ivory">Our Memories</h1>
+          <SectionLabel>Keepsakes</SectionLabel>
+          <h1 className="font-display text-3xl font-medium text-ivory">Our Keepsakes</h1>
         </div>
         <p className="text-[11px] text-mist">{pluralize(memories.length, "memory")}</p>
       </div>

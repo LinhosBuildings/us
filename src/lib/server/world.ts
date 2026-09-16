@@ -185,6 +185,17 @@ export async function addReflection(question: string, answer: string) {
   return {};
 }
 
+export type ReflectionState = { error?: string };
+
+export async function submitReflection(_prev: ReflectionState, formData: FormData): Promise<ReflectionState> {
+  const question = formData.get("question");
+  const answer = formData.get("answer");
+  if (typeof question !== "string" || typeof answer !== "string" || !question.trim() || !answer.trim()) {
+    return { error: "Write both a question and an answer." };
+  }
+  return addReflection(question, answer);
+}
+
 export async function reflectionQuestions() {
   const { relationship } = await requireRelationship();
   const store = await getStore();

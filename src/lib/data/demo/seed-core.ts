@@ -33,7 +33,7 @@ export const seedRelationship: Relationship = {
   id: REL,
   code: "NOV13-24",
   secretCode: "NOV13-24",
-  name: "BIGGY~LINHO",
+  name: "BIGGYLINHO",
   startDate: START,
   title: "Universe",
   description:
@@ -41,7 +41,7 @@ export const seedRelationship: Relationship = {
   coverImageUrl: svgPhoto({
     seed: "cover",
     label: "B&L",
-    title: "biggy ~ linho",
+    title: "biggy linho",
     date: "since november 13, 2024",
     mood: "forever",
   }),

@@ -37,6 +37,20 @@ import {
   seedSurvived,
 } from "@/lib/data/demo/seed-world";
 
+/** Deterministic constellation placement for a memory — stable forever for the same id. */
+function constellationCoord(seed: string): { x: number; y: number } {
+  let h1 = 2166136261;
+  let h2 = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h1 = Math.imul(h1 ^ seed.charCodeAt(i), 16777619);
+    h2 = Math.imul(h2 ^ ((seed.charCodeAt(i) << 1) & 0xff), 16777619);
+  }
+  return {
+    x: 0.14 + ((h1 >>> 0) % 10000) / 10000 * 0.72,
+    y: 0.14 + ((h2 >>> 0) % 10000) / 10000 * 0.48,
+  };
+}
+
 const allSeedMedia = (): MediaAsset[] => {
   const out: MediaAsset[] = [];
   for (const mem of seedMemories) out.push(...mem.media);
@@ -255,8 +269,11 @@ export class DemoStore implements DataStore {
     if (!rel) throw new Error("Relationship not found");
     if (!rel.members.some((m) => m.id === authorId)) throw new Error("Not a member of this relationship");
     const author = this.users.get(authorId);
+    const memoryId = uid("mem");
+    const place =
+      input.constellationX != null && input.constellationY != null ? null : constellationCoord(memoryId);
     const memory: Memory = {
-      id: uid("mem"),
+      id: memoryId,
       relationshipId,
       title: input.title,
       kind: input.kind,
@@ -274,8 +291,8 @@ export class DemoStore implements DataStore {
       createdBy: authorId,
       createdByName: author?.name ?? "Someone",
       neverTold: input.neverTold ?? null,
-      constellationX: input.constellationX ?? 0.2 + Math.random() * 0.6,
-      constellationY: input.constellationY ?? 0.2 + Math.random() * 0.5,
+      constellationX: input.constellationX ?? place?.x ?? null,
+      constellationY: input.constellationY ?? place?.y ?? null,
       chapterId: input.chapterId ?? null,
       milestone: input.milestoneLabel ? { label: input.milestoneLabel } : null,
       status: input.status ?? "verified",

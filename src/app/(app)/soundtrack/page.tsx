@@ -1,7 +1,9 @@
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
-import { Card, SectionLabel, EmptyState } from "@/components/ui";
+import { Card, SectionLabel, EmptyState, Button } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
+import { AddSheet } from "@/components/add-sheet";
+import { addSoundtrackSong } from "@/lib/server/world";
 
 export default async function SoundtrackPage() {
   const user = await requireUser();
@@ -13,12 +15,28 @@ export default async function SoundtrackPage() {
 
   return (
     <div className="space-y-8 pb-24 md:pb-0">
-      <div>
-        <SectionLabel>The Soundtrack</SectionLabel>
-        <h1 className="font-display text-3xl font-medium text-ivory">The Soundtrack of Us</h1>
-        <p className="mt-1 max-w-lg text-sm text-fog">
-          The songs that map your relationship — what you heard, what you felt, what you sang together.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <SectionLabel>The Soundtrack</SectionLabel>
+          <h1 className="font-display text-3xl font-medium text-ivory">The Soundtrack of Us</h1>
+          <p className="mt-1 max-w-lg text-sm text-fog">
+            The songs that map your relationship — what you heard, what you felt, what you sang together.
+          </p>
+        </div>
+        <AddSheet
+          trigger={<Button size="sm">Add a song</Button>}
+          title="A song that's us"
+          eyebrow="The Soundtrack"
+          submitLabel="Add it"
+          action={addSoundtrackSong}
+          fields={[
+            { name: "title", label: "Song", required: true, placeholder: "e.g. Can't Take My Eyes Off You", maxLength: 200 },
+            { name: "artist", label: "Artist", required: true, placeholder: "e.g. Frankie Valli", maxLength: 200 },
+            { name: "externalUrl", label: "Link (Spotify / YouTube)", placeholder: "https://…", maxLength: 500 },
+            { name: "why", label: "Why this one", type: "textarea", rows: 2, placeholder: "It was playing the night we first danced", maxLength: 2000 },
+            { name: "date", label: "When it became ours", type: "date" },
+          ]}
+        />
       </div>
 
       {songs.length === 0 ? (

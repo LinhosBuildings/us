@@ -1,7 +1,9 @@
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
-import { Card, SectionLabel, EmptyState } from "@/components/ui";
+import { Card, SectionLabel, EmptyState, Button } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
+import { AddSheet } from "@/components/add-sheet";
+import { createLetter } from "@/lib/server/expressions";
 import type { LetterCategory } from "@/lib/types";
 
 const CATEGORY_LABELS: Record<LetterCategory, string> = {
@@ -32,10 +34,30 @@ export default async function LettersPage() {
 
   return (
     <div className="space-y-8 pb-24 md:pb-0">
-      <div>
-        <SectionLabel>Letters</SectionLabel>
-        <h1 className="font-display text-3xl font-medium text-ivory">Letters</h1>
-        <p className="mt-1 max-w-lg text-sm text-fog">Handwritten words in a private place. Say the things the algorithm would never let you say.</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <SectionLabel>Letters</SectionLabel>
+          <h1 className="font-display text-3xl font-medium text-ivory">Letters</h1>
+          <p className="mt-1 max-w-lg text-sm text-fog">Handwritten words in a private place. Say the things the algorithm would never let you say.</p>
+        </div>
+        <AddSheet
+          trigger={<Button size="sm">Write a letter</Button>}
+          title="Write a letter"
+          eyebrow="Letters"
+          submitLabel="Seal the letter"
+          media
+          action={createLetter}
+          fields={[
+            { name: "title", label: "Title", required: true, placeholder: "A line that says it before they read it", maxLength: 220 },
+            {
+              name: "category",
+              label: "This is a letter for…",
+              type: "select",
+              options: (Object.keys(CATEGORY_LABELS) as LetterCategory[]).map((c) => ({ value: c, label: CATEGORY_LABELS[c] })),
+            },
+            { name: "body", label: "The letter", type: "textarea", rows: 7, required: true, placeholder: "Start with whatever's true.", maxLength: 20000 },
+          ]}
+        />
       </div>
 
       {letters.length === 0 ? (

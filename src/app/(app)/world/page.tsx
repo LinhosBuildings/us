@@ -1,8 +1,10 @@
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
 import Link from "next/link";
-import { Card, SectionLabel, Pill, EmptyState } from "@/components/ui";
+import { Card, SectionLabel, Pill, EmptyState, Button } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
+import { AddSheet } from "@/components/add-sheet";
+import { createPlace } from "@/lib/server/world";
 
 export default async function WorldPage() {
   const user = await requireUser();
@@ -14,12 +16,28 @@ export default async function WorldPage() {
 
   return (
     <div className="space-y-8 pb-24 md:pb-0">
-      <div>
-        <SectionLabel>Our World</SectionLabel>
-        <h1 className="font-display text-3xl font-medium text-ivory">Our World</h1>
-        <p className="mt-1 max-w-lg text-sm text-fog">
-          A map of your shared world — places, stories, the geography of your relationship.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <SectionLabel>Our Planet</SectionLabel>
+          <h1 className="font-display text-3xl font-medium text-ivory">Our Planet</h1>
+          <p className="mt-1 max-w-lg text-sm text-fog">
+            A map of your shared world — places, stories, the geography of your relationship.
+          </p>
+        </div>
+        <AddSheet
+          trigger={<Button size="sm">Drop a pin</Button>}
+          title="A place of ours"
+          eyebrow="Our World"
+          submitLabel="Save the place"
+          action={createPlace}
+          fields={[
+            { name: "name", label: "Place", required: true, placeholder: "e.g. The bench at Aberdeen Beach", maxLength: 160 },
+            { name: "latitude", label: "Latitude", required: true, placeholder: "e.g. 6.5074", hint: "Find it on Google Maps and copy the numbers" },
+            { name: "longitude", label: "Longitude", required: true, placeholder: "e.g. 3.3697" },
+            { name: "date", label: "When", type: "date" },
+            { name: "story", label: "Why this place", type: "textarea", rows: 3, placeholder: "The story that lives here", maxLength: 3000 },
+          ]}
+        />
       </div>
 
       <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1">

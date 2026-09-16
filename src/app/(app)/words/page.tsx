@@ -53,7 +53,7 @@ export default async function WordsPage() {
   return (
     <div className="mx-auto w-full max-w-3xl space-y-8">
       <div className="text-center">
-        <SectionLabel>Our Words</SectionLabel>
+        <SectionLabel>Words of Us</SectionLabel>
         <h1 className="font-display text-4xl font-medium text-ivory">Everything we&rsquo;ve written</h1>
         <p className="mx-auto mt-2 max-w-md text-sm text-fog">
           Letters, open-when, confessions, the words only we use, and the questions we keep asking each other.

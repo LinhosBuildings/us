@@ -82,7 +82,7 @@ export function MediaGallery({ items }: { items: MediaAsset[] }) {
 
       {openIndex !== null && images[openIndex] ? (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-midnight/95 backdrop-blur-sm"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-[#351638]/95 backdrop-blur-sm"
           onClick={() => setOpenIndex(null)}
           role="dialog"
           aria-modal="true"
@@ -98,7 +98,7 @@ export function MediaGallery({ items }: { items: MediaAsset[] }) {
                   e.stopPropagation();
                   step(-1);
                 }}
-                className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-line-strong bg-midnight/70 text-xl text-ivory backdrop-blur-md transition-colors hover:border-champagne/50 hover:text-champagne-soft sm:left-5"
+                className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-line-strong bg-[#351638]/70 text-xl text-[#f7eaf7] backdrop-blur-md transition-colors hover:border-champagne/50 hover:text-champagne-soft sm:left-5"
               >
                 ‹
               </button>
@@ -109,11 +109,11 @@ export function MediaGallery({ items }: { items: MediaAsset[] }) {
                   e.stopPropagation();
                   step(1);
                 }}
-                className="absolute right-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-line-strong bg-midnight/70 text-xl text-ivory backdrop-blur-md transition-colors hover:border-champagne/50 hover:text-champagne-soft sm:right-5"
+                className="absolute right-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-line-strong bg-[#351638]/70 text-xl text-[#f7eaf7] backdrop-blur-md transition-colors hover:border-champagne/50 hover:text-champagne-soft sm:right-5"
               >
                 ›
               </button>
-              <span className="pointer-events-none absolute bottom-5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-midnight/70 px-3 py-1 font-mono text-[11px] text-mist">
+              <span className="pointer-events-none absolute bottom-5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-[#351638]/70 px-3 py-1 font-mono text-[11px] text-mist">
                 {openIndex + 1} / {images.length}
               </span>
             </>
@@ -127,7 +127,7 @@ export function MediaGallery({ items }: { items: MediaAsset[] }) {
               e.stopPropagation();
               setOpenIndex(null);
             }}
-            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-line-strong bg-midnight/70 text-ivory backdrop-blur-md"
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-line-strong bg-[#351638]/70 text-[#f7eaf7] backdrop-blur-md"
           >
             ✕
           </button>

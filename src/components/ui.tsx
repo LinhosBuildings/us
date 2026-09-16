@@ -14,11 +14,11 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-champagne text-midnight hover:bg-champagne-soft shadow-[0_8px_30px_-12px_rgba(201,169,97,0.7)]",
+          "bg-[#5a0b62] text-white hover:bg-[#6d1a76] shadow-[0_10px_30px_-12px_rgba(90,11,98,0.4)]",
         outline:
-          "border border-line-strong text-ink hover:border-champagne/50 hover:text-champagne-soft bg-transparent",
-        ghost: "text-fog hover:text-ink hover:bg-white/5",
-        soft: "bg-champagne-faint text-champagne-soft hover:bg-champagne/20",
+          "border border-line-strong text-ink hover:border-champagne/50 hover:text-champagne bg-transparent",
+        ghost: "text-fog hover:text-ivory hover:bg-champagne-faint",
+        soft: "bg-[#f5e6f5] text-[#2e0b33] hover:bg-[#eedeef]",
         danger: "border border-ember/40 text-ember hover:bg-ember/10",
       },
       size: {
@@ -120,7 +120,7 @@ export function Field({
 
 /* ── Avatar ─────────────────────────────────────────────────── */
 
-const AVATAR_PALETTE = ["#c9a961", "#c97d5f", "#7d8f7b", "#8b7da6", "#5b6478", "#a4c3b2"];
+const AVATAR_PALETTE = ["#e44297", "#f880be", "#8a5c8f", "#8f5fd6", "#f0b25e", "#c9a3e6"];
 
 export function initialsFor(name: string): string {
   return name

@@ -19,8 +19,8 @@ export default async function StoryPage() {
   return (
     <div className="space-y-8 pb-24 md:pb-0">
       <div className="text-center">
-        <SectionLabel>Relive Our Story</SectionLabel>
-        <h1 className="font-display text-3xl font-medium text-ivory">Our Story</h1>
+        <SectionLabel>How We Happened</SectionLabel>
+        <h1 className="font-display text-3xl font-medium text-ivory">How We Happened</h1>
         <p className="mx-auto mt-1 max-w-lg text-sm text-fog">
           Every relationship has a shape. A beginning, a deepening, chapters you&rsquo;re still writing.
         </p>

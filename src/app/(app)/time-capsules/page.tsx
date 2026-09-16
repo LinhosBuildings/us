@@ -1,7 +1,9 @@
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
-import { Card, SectionLabel, Pill, EmptyState } from "@/components/ui";
+import { Card, SectionLabel, Pill, EmptyState, Button } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
+import { AddSheet } from "@/components/add-sheet";
+import { createTimeCapsule } from "@/lib/server/world";
 
 export default async function TimeCapsulesPage() {
   const user = await requireUser();
@@ -13,12 +15,29 @@ export default async function TimeCapsulesPage() {
 
   return (
     <div className="space-y-8 pb-24 md:pb-0">
-      <div>
-        <SectionLabel>Time Capsules</SectionLabel>
-        <h1 className="font-display text-3xl font-medium text-ivory">Time Capsules</h1>
-        <p className="mt-1 max-w-lg text-sm text-fog">
-          Letters from the present to the future. You seal them today. You open them on a date, or when you&rsquo;re ready.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <SectionLabel>Time Capsules</SectionLabel>
+          <h1 className="font-display text-3xl font-medium text-ivory">Time Capsules</h1>
+          <p className="mt-1 max-w-lg text-sm text-fog">
+            Letters from the present to the future. You seal them today. You open them on a date, or when you&rsquo;re ready.
+          </p>
+        </div>
+        <AddSheet
+          trigger={<Button size="sm">Seal a capsule</Button>}
+          title="A time capsule"
+          eyebrow="Time Capsules"
+          submitLabel="Seal it"
+          media
+          action={createTimeCapsule}
+          fields={[
+            { name: "title", label: "Title", required: true, placeholder: "To us, three years from now", maxLength: 220 },
+            { name: "unlockAt", label: "Open date", type: "date", required: true },
+            { name: "note", label: "A note to future us", type: "textarea", rows: 4, placeholder: "Where we are now. What we're hoping. What we'd want to remember.", maxLength: 3000 },
+            { name: "questions", label: "Questions for future us", type: "list", placeholder: "Are we still dancing in the kitchen?" },
+            { name: "predictions", label: "Predictions", type: "list", placeholder: "By then, you'll have proposed…" },
+          ]}
+        />
       </div>
 
       {capsules.length === 0 ? (

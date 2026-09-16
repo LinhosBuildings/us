@@ -1,7 +1,9 @@
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
 import Link from "next/link";
-import { Card, SectionLabel, Pill, EmptyState } from "@/components/ui";
+import { Card, SectionLabel, Pill, EmptyState, Button } from "@/components/ui";
+import { AddSheet } from "@/components/add-sheet";
+import { createGoal } from "@/lib/server/world";
 
 const CATEGORY_LABELS: Record<string, string> = {
   love: "Love",
@@ -23,12 +25,32 @@ export default async function FuturePage() {
 
   return (
     <div className="space-y-8 pb-24 md:pb-0">
-      <div>
-        <SectionLabel>The Future Tree</SectionLabel>
-        <h1 className="font-display text-3xl font-medium text-ivory">Our Future</h1>
-        <p className="mt-1 max-w-lg text-sm text-fog">
-          A place to hold dreams — small, big, concrete, impossible — and say them out loud together.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <SectionLabel>Forever &amp; Always</SectionLabel>
+          <h1 className="font-display text-3xl font-medium text-ivory">Forever &amp; Always</h1>
+          <p className="mt-1 max-w-lg text-sm text-fog">
+            A place to hold dreams — small, big, concrete, impossible — and say them out loud together.
+          </p>
+        </div>
+        <AddSheet
+          trigger={<Button size="sm">Dream loudly</Button>}
+          title="A dream for us"
+          eyebrow="The Future"
+          submitLabel="Plant the dream"
+          action={createGoal}
+          fields={[
+            { name: "title", label: "The dream", required: true, placeholder: "e.g. Build our own house by the sea", maxLength: 220 },
+            {
+              name: "category",
+              label: "What kind?",
+              type: "select",
+              options: Object.entries(CATEGORY_LABELS).map(([v, l]) => ({ value: v, label: l })),
+            },
+            { name: "description", label: "What it looks like", type: "textarea", rows: 3, placeholder: "Paint the picture so we can both see it", maxLength: 3000 },
+            { name: "targetDate", label: "Target", type: "date", hint: "Optional — some dreams just happen" },
+          ]}
+        />
       </div>
 
       <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1">

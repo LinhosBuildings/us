@@ -1,7 +1,9 @@
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
-import { Card, SectionLabel, Pill, EmptyState } from "@/components/ui";
+import { Card, SectionLabel, Pill, EmptyState, Button } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
+import { AddSheet } from "@/components/add-sheet";
+import { createOpenWhen } from "@/lib/server/expressions";
 
 export default async function OpenWhenPage() {
   const user = await requireUser();
@@ -13,12 +15,39 @@ export default async function OpenWhenPage() {
 
   return (
     <div className="space-y-8 pb-24 md:pb-0">
-      <div>
-        <SectionLabel>Open When…</SectionLabel>
-        <h1 className="font-display text-3xl font-medium text-ivory">Open When</h1>
-        <p className="mt-1 max-w-lg text-sm text-fog">
-          A collection of sealed and unsealed letters for moments that haven&rsquo;t happened yet — or have.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <SectionLabel>Open When…</SectionLabel>
+          <h1 className="font-display text-3xl font-medium text-ivory">Open When</h1>
+          <p className="mt-1 max-w-lg text-sm text-fog">
+            A collection of sealed and unsealed letters for moments that haven&rsquo;t happened yet — or have.
+          </p>
+        </div>
+        <AddSheet
+          trigger={<Button size="sm">Write one</Button>}
+          title="An Open When letter"
+          eyebrow="Open When…"
+          submitLabel="Seal it"
+          media
+          action={createOpenWhen}
+          fields={[
+            { name: "title", label: "Open when…", required: true, placeholder: "…you've had the worst day", maxLength: 220 },
+            {
+              name: "lockBehavior",
+              label: "When does it open?",
+              type: "select",
+              options: [
+                { value: "immediate", label: "Immediately — open anytime" },
+                { value: "date", label: "On a chosen date" },
+                { value: "interaction", label: "By interaction — sealed until one of us unlocks it" },
+                { value: "permanent", label: "Never — it stays sealed forever" },
+              ],
+            },
+            { name: "unlockAt", label: "Open date", type: "date", hint: "Only for 'On a chosen date'", maxLength: 10 },
+            { name: "interactionHint", label: "How should it open?", hint: "Only for 'By interaction'", placeholder: "e.g. When we take our first trip together", maxLength: 400 },
+            { name: "body", label: "The letter", type: "textarea", rows: 5, required: true, placeholder: "Write to the moment.", maxLength: 10000 },
+          ]}
+        />
       </div>
 
       {entries.length === 0 ? (

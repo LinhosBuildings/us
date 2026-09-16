@@ -1,7 +1,9 @@
 import { requireUser } from "@/lib/server/session";
 import { getStore } from "@/lib/data/contracts";
-import { Card, SectionLabel, Pill, EmptyState } from "@/components/ui";
+import { Card, SectionLabel, Pill, EmptyState, Button } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
+import { AddSheet } from "@/components/add-sheet";
+import { addSurvived } from "@/lib/server/world";
 
 export default async function SurvivedPage() {
   const user = await requireUser();
@@ -13,12 +15,28 @@ export default async function SurvivedPage() {
 
   return (
     <div className="space-y-8 pb-24 md:pb-0">
-      <div>
-        <SectionLabel>What We Survived</SectionLabel>
-        <h1 className="font-display text-3xl font-medium text-ivory">What We Survived</h1>
-        <p className="mt-1 max-w-lg text-sm text-fog">
-          You made it through. Mark the scar. Write what happened, what you felt, what you learned — so future you remembers the weight you carried and kept going.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <SectionLabel>What We Survived</SectionLabel>
+          <h1 className="font-display text-3xl font-medium text-ivory">What We Survived</h1>
+          <p className="mt-1 max-w-lg text-sm text-fog">
+            You made it through. Mark the scar. Write what happened, what you felt, what you learned — so future you remembers the weight you carried and kept going.
+          </p>
+        </div>
+        <AddSheet
+          trigger={<Button size="sm">Mark what we survived</Button>}
+          title="What we survived"
+          eyebrow="What We Survived"
+          submitLabel="Mark it"
+          action={addSurvived}
+          fields={[
+            { name: "whatHappened", label: "What happened", type: "textarea", rows: 3, required: true, placeholder: "Plainly — what we went through", maxLength: 3000 },
+            { name: "howIFelt", label: "How I felt", type: "textarea", rows: 2, placeholder: "What it was like in the middle of it", maxLength: 3000 },
+            { name: "whatILearned", label: "What I learned", type: "textarea", rows: 2, placeholder: "What it taught us", maxLength: 3000 },
+            { name: "howWeResolved", label: "How we got through it", type: "textarea", rows: 2, placeholder: "The part where we chose each other", maxLength: 3000 },
+            { name: "doNotForget", label: "Do not forget", placeholder: "The one thing future us must remember", maxLength: 3000 },
+          ]}
+        />
       </div>
 
       {entries.length === 0 ? (

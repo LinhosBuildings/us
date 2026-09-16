@@ -38,7 +38,7 @@ export function svgPhoto(opts: { seed: string; title?: string; date?: string; mo
   const { seed, title, date, mood, label } = opts;
   const palette = pick(seed, PALETTES);
   const [c1, c2, c3] = palette;
-  const accent = pick(seed, ["#c9a961", "#c97d5f", "#7d8f7b", "#8f9bb3", "#a3947a", "#b08d57"]);
+  const accent = pick(seed, ["#e44297", "#f880be", "#f0b25e", "#8f5fd6", "#f6c4ea", "#c9a3e6"]);
   const initial = (label ?? "M").slice(0, 1).toUpperCase();
   const titleLine = title ? esc(title.slice(0, 42)) : "Untitled";
   const dateLine = date ? esc(date) : "";
@@ -52,7 +52,7 @@ export function svgPhoto(opts: { seed: string; title?: string; date?: string; mo
   const rings = [...Array(3)].map((_, i) => {
     const r = 40 + i * 26;
     const o = 0.06 - i * 0.015;
-    return `<circle cx="72%" cy="26%" r="${r}" fill="none" stroke="#ecebe3" stroke-opacity="${o}" stroke-width="${1 + i * 0.5}"/>`;
+    return `<circle cx="72%" cy="26%" r="${r}" fill="none" stroke="#ffb3cb" stroke-opacity="${o}" stroke-width="${1 + i * 0.5}"/>`;
   }).join("");
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
@@ -76,10 +76,10 @@ export function svgPhoto(opts: { seed: string; title?: string; date?: string; mo
   ${rings}
   ${circles}
   <g opacity="0.05" filter="url(#grain)"><rect width="1200" height="900" fill="#ffffff"/></g>
-  <text x="90" y="470" font-family="Georgia, 'Times New Roman', serif" font-size="360" font-style="italic" fill="#ecebe3" fill-opacity="0.9">${esc(initial)}</text>
-  <text x="90" y="700" font-family="Georgia, 'Times New Roman', serif" font-size="54" fill="#ecebe3">${titleLine}</text>
+  <text x="90" y="470" font-family="Georgia, 'Times New Roman', serif" font-size="360" font-style="italic" fill="#ffb3cb" fill-opacity="0.9">${esc(initial)}</text>
+  <text x="90" y="700" font-family="Georgia, 'Times New Roman', serif" font-size="54" fill="#ffb3cb">${titleLine}</text>
   <text x="90" y="752" font-family="'Courier New', monospace" font-size="22" letter-spacing="4" fill="${accent}">${dateLine}</text>
-  <text x="90" y="792" font-family="'Courier New', monospace" font-size="20" letter-spacing="6" fill="#ecebe3" fill-opacity="0.4">${moodLine}</text>
+  <text x="90" y="792" font-family="'Courier New', monospace" font-size="20" letter-spacing="6" fill="#ffb3cb" fill-opacity="0.4">${moodLine}</text>
 </svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
@@ -87,17 +87,17 @@ export function svgPhoto(opts: { seed: string; title?: string; date?: string; mo
 export function svgVideo(opts: { seed: string; title?: string; date?: string }) {
   const photo = svgPhoto(opts);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
-  <rect width="1200" height="900" fill="#0b0b10"/>
+  <rect width="1200" height="900" fill="#351638"/>
   <circle cx="600" cy="430" r="72" fill="#c9a961" fill-opacity="0.12" stroke="#c9a961" stroke-width="1.5"/>
-  <circle cx="600" cy="430" r="72" fill="none" stroke="#ecebe3" stroke-opacity="0.28" stroke-width="1"/>
-  <path d="M588 398 L600 398 L600 462 L588 462 Q570 430 588 398 Z" fill="#ecebe3"/>
+  <circle cx="600" cy="430" r="72" fill="none" stroke="#ffb3cb" stroke-opacity="0.28" stroke-width="1"/>
+  <path d="M588 398 L600 398 L600 462 L588 462 Q570 430 588 398 Z" fill="#ffb3cb"/>
   <text x="600" y="560" text-anchor="middle" font-family="'Courier New', monospace" font-size="20" letter-spacing="5" fill="#98959f">${esc(opts.title ?? "A MOVING MOMENT")}</text>
 </svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
 export function svgWaveform(opts: { seed: string; label?: string; durationMs?: number }) {
-  const accent = pick(opts.seed, ["#c9a961", "#c97d5f", "#7d8f7b", "#8f9bb3"]);
+  const accent = pick(opts.seed, ["#e44297", "#f880be", "#f0b25e", "#8f5fd6"]);
   const bars = [...Array(48)].map((_, i) => {
     const h = (hash(opts.seed + "b" + i * 7) % 60) + 14;
     const gap = Math.sin(i * 1.7) * 8;
@@ -106,12 +106,12 @@ export function svgWaveform(opts: { seed: string; label?: string; durationMs?: n
   }).join("");
   const rel = Math.round((opts.durationMs ?? 45000) / 1000);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="160" viewBox="0 0 720 160">
-  <rect width="720" height="160" fill="#0b0b10" rx="18"/>
+  <rect width="720" height="160" fill="#351638" rx="18"/>
   <circle cx="42" cy="42" r="18" fill="${accent}" fill-opacity="0.9"/>
-  <path d="M36 34 L36 50 M46 30 L46 54" stroke="#0b0b10" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M36 34 L36 50 M46 30 L46 54" stroke="#351638" stroke-width="2.5" stroke-linecap="round"/>
   ${bars}
   <text x="34" y="132" font-family="'Courier New', monospace" font-size="16" letter-spacing="3" fill="#98959f">${rel} SEC</text>
-  <text x="360" y="132" text-anchor="middle" font-family="'Courier New', monospace" font-size="14" letter-spacing="4" fill="#ecebe3" fill-opacity="0.5">${esc(opts.label ?? "A VOICE NOTE")}</text>
+  <text x="360" y="132" text-anchor="middle" font-family="'Courier New', monospace" font-size="14" letter-spacing="4" fill="#ffb3cb" fill-opacity="0.5">${esc(opts.label ?? "A VOICE NOTE")}</text>
 </svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
@@ -129,9 +129,9 @@ export function svgAvatar(opts: { seed: string; name: string }) {
     <stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/>
   </linearGradient></defs>
   <rect width="256" height="256" fill="url(#g)"/>
-  <circle cx="128" cy="100" r="46" fill="#ecebe3" fill-opacity="0.12"/>
-  <path d="M52 236 Q80 150 128 150 Q176 150 204 236 Z" fill="#ecebe3" fill-opacity="0.12"/>
-  <text x="128" y="146" text-anchor="middle" font-family="Georgia, serif" font-size="64" fill="#ecebe3">${esc(initials)}</text>
+  <circle cx="128" cy="100" r="46" fill="#ffb3cb" fill-opacity="0.12"/>
+  <path d="M52 236 Q80 150 128 150 Q176 150 204 236 Z" fill="#ffb3cb" fill-opacity="0.12"/>
+  <text x="128" y="146" text-anchor="middle" font-family="Georgia, serif" font-size="64" fill="#ffb3cb">${esc(initials)}</text>
 </svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
